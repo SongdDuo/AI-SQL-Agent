@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-sql-agent"
+version = "1.0.0"
+description = "Multi-model collaborative AI SQL Agent — NL to SQL, execution, optimization and analysis."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "song", email = "song@aisqlagent.dev"},
+]
+keywords = ["sql", "ai", "agent", "gpt", "glm", "claude", "mimo", "natural-language", "database"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "openai>=1.0.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+claude = ["anthropic>=0.20.0"]
+dm = ["dmPython>=2.0.0"]
+mysql = ["pymysql>=1.1.0"]
+postgres = ["psycopg2-binary>=2.9.0"]
+all = ["anthropic>=0.20.0", "dmPython>=2.0.0", "pymysql>=1.1.0", "psycopg2-binary>=2.9.0"]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "ruff>=0.1.0"]
+
+[project.scripts]
+ai-sql = "ai_sql_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
