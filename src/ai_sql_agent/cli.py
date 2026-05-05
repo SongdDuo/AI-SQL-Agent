@@ -19,7 +19,10 @@ from .utils.formatter import format_sql
 console = Console()
 
 DIALECT_CHOICES = click.Choice(["dm", "mysql", "postgres", "sqlite", "standard"])
-PROVIDER_CHOICES = click.Choice(["openai", "glm", "mimo", "claude", "deepseek", "qwen"])
+PROVIDER_CHOICES = click.Choice([
+    "openai", "glm", "mimo", "claude", "deepseek", "qwen",
+    "longcat", "longcat-flash", "longcat-thinking", "longcat-omni", "longcat-lite",
+])
 
 
 def _get_dialect(dialect_str: str) -> DialectType:

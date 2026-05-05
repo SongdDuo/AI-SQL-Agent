@@ -71,6 +71,26 @@ PROVIDER_PRESETS = {
         "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "model": "qwen-plus",
     },
+    "longcat": {
+        "base_url": "https://api.longcat.chat/openai",
+        "model": "longcat-2.0-preview",
+    },
+    "longcat-flash": {
+        "base_url": "https://api.longcat.chat/openai",
+        "model": "LongCat-Flash-Chat",
+    },
+    "longcat-thinking": {
+        "base_url": "https://api.longcat.chat/openai",
+        "model": "LongCat-Flash-Thinking-2601",
+    },
+    "longcat-omni": {
+        "base_url": "https://api.longcat.chat/openai",
+        "model": "LongCat-Flash-Omni-2603",
+    },
+    "longcat-lite": {
+        "base_url": "https://api.longcat.chat/openai",
+        "model": "LongCat-Flash-Lite",
+    },
 }
 
 

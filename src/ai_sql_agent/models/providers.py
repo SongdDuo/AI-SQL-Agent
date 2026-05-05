@@ -75,6 +75,11 @@ PROVIDER_REGISTRY = {
     "mimo": OpenAICompatibleModel,
     "deepseek": OpenAICompatibleModel,
     "qwen": OpenAICompatibleModel,
+    "longcat": OpenAICompatibleModel,
+    "longcat-flash": OpenAICompatibleModel,
+    "longcat-thinking": OpenAICompatibleModel,
+    "longcat-omni": OpenAICompatibleModel,
+    "longcat-lite": OpenAICompatibleModel,
     "claude": ClaudeModel,
 }
 

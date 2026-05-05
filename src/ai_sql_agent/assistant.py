@@ -17,6 +17,7 @@ from .prompts.templates import (
     OPTIMIZE_SQL_PROMPT,
     SCHEMA_ANALYSIS_PROMPT,
     SYSTEM_PROMPT,
+    MULTI_TURN_SYSTEM_PROMPT,
 )
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,32 @@ class SQLAssistant:
                 messages.append(Message(h["role"], h["content"]))
         messages.append(self._user_msg(message))
         return self._chat(messages, temperature=0.5)
+
+    def chat_multi_turn(
+        self,
+        message: str,
+        history: Optional[List[Dict]] = None,
+        schema_context: str = "",
+    ) -> str:
+        """
+        Multi-turn conversation with schema awareness.
+
+        Args:
+            message: User message
+            history: Conversation history [{"role": "user"|"assistant", "content": "..."}]
+            schema_context: Database schema context for better SQL generation
+        """
+        ctx = schema_context or ""
+        sys_prompt = MULTI_TURN_SYSTEM_PROMPT.format(
+            dialect=self.dialect.value,
+            schema_context=ctx,
+        )
+        messages = [self._system_msg(sys_prompt)]
+        if history:
+            for h in history[-10:]:  # Keep last 10 turns
+                messages.append(Message(h["role"], h["content"]))
+        messages.append(self._user_msg(message))
+        return self._chat(messages, temperature=0.3)
 
     def close(self):
         if self._db:
