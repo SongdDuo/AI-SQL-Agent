@@ -1,18 +1,21 @@
 <p align="center">
-  <h1 align="center">AI SQL Agent</h1>
+  <h1 align="center">🤖 AI SQL Agent</h1>
   <p align="center">
-    <strong>基于多模型协同的 AI SQL Agent</strong>
+    <strong>基于多模型协同的 AI SQL 智能体</strong>
   </p>
   <p align="center">
-    自然语言 → SQL 生成 → 执行 → 结果分析，一站式智能数据查询
+    🚀 自然语言 → SQL 生成 → 执行 → 结果分析，一站式智能数据查询
   </p>
   <p align="center">
-    <a href="#功能特性">功能</a> •
-    <a href="#快速开始">快速开始</a> •
-    <a href="#使用方式">使用</a> •
-    <a href="#agent-工作流">Agent 工作流</a> •
-    <a href="#支持的模型">模型</a> •
-    <a href="#贡献指南">贡献</a> •
+    <a href="https://github.com/SongdDuo/AI-SQL-Agent" target="_blank">🌟 GitHub</a> •
+    <a href="#功能特性">✨ 功能</a> •
+    <a href="#快速开始">🚀 快速开始</a> •
+    <a href="#使用方式">📖 使用</a> •
+    <a href="#agent-工作流">🤖 Agent 工作流</a> •
+    <a href="#支持的模型">🧠 支持的模型</a> •
+    <a href="#数据库配置">🗄️ 数据库配置</a> •
+    <a href="#贡献指南">🤝 贡献</a> •
+    <a href="https://github.com/SongdDuo/AI-SQL-Agent/actions" target="_blank">🔄 Actions</a> •
     <a href="README_EN.md">English</a>
   </p>
 </p>
@@ -27,18 +30,18 @@
 
 与传统 SQL 工具不同，本项目引入 **Agent 工作流**，可自动拆解用户任务、生成查询、执行数据库操作，并对结果进行结构化分析与解释。
 
-## 功能特性
+## ✨ 功能特性
 
-- **自然语言转 SQL** — 用中文描述需求，自动生成生产级 SQL
-- **Agent 自动工作流** — 任务自动拆解 → SQL 生成 → 执行 → 结果分析
-- **SQL 执行引擎** — 连接真实数据库，直接执行并返回结构化结果
-- **智能结果分析** — AI 自动解读查询结果，发现数据规律和异常
-- **SQL 优化建议** — 检测性能问题，给出优化方案和索引建议
-- **SQL 解释** — 将复杂 SQL 逐步拆解为自然语言说明
-- **多模型支持** — GPT / GLM / Claude / MiMo / DeepSeek / Qwen 一键切换
-- **多方言支持** — 达梦(DM)、MySQL、PostgreSQL、SQLite
-- **Schema 感知** — 连接数据库后，AI 自动理解表结构生成精准 SQL
-- **CLI & SDK** — 命令行工具 + Python SDK，灵活集成
+- 💬 **自然语言转 SQL** — 用中文描述需求，自动生成生产级 SQL
+- 🤖 **Agent 自动工作流** — 任务自动拆解 → SQL 生成 → 执行 → 结果分析
+- 🚀 **SQL 执行引擎** — 连接真实数据库，直接执行并返回结构化结果
+- 📊 **智能结果分析** — AI 自动解读查询结果，发现数据规律和异常
+- ⚡ **SQL 优化建议** — 检测性能问题，给出优化方案和索引建议
+- 📝 **SQL 解释** — 将复杂 SQL 逐步拆解为自然语言说明
+- 🧠 **多模型支持** — GPT / GLM / Claude / MiMo / DeepSeek / Qwen 一键切换
+- 🗄️ **多方言支持** — 达梦(DM)、MySQL、PostgreSQL、SQLite
+- 🕵️ **Schema 感知** — 连接数据库后，AI 自动理解表结构生成精准 SQL
+- 🛠️ **CLI & SDK** — 命令行工具 + Python SDK，灵活集成
 
 ## 快速开始
 
@@ -57,6 +60,56 @@ pip install ai-sql-agent[postgres] # PostgreSQL
 pip install ai-sql-agent[claude]   # Claude 支持
 pip install ai-sql-agent[all]      # 全部
 ```
+
+### 测试账号配置
+
+创建 `.env` 文件进行本地测试：
+
+```bash
+# 选择默认模型提供商（测试推荐使用 mimo 或 glm）
+AI_DEFAULT_PROVIDER=mimo
+
+# 配置 API Key（至少配一个）
+AI_MIMO_API_KEY=your_mimo_api_key_here
+AI_GLM_API_KEY=your_glm_api_key_here
+
+# 测试时使用 SQLite（无需真实数据库）
+DB_TYPE=sqlite
+DB_NAME=:memory:  # 内存数据库，测试完即销毁
+```
+
+### 样式说明
+
+本项目使用 **Rich** 库提供优雅的 CLI 输出：
+
+- 🟦 **SQL 代码块**：语法高亮，行号显示
+- 🟨 **解释面板**：Markdown 格式的自然语言解释
+- 🟩 **优化建议**：绿色背景的优化后 SQL
+- 🟥 **错误提示**：红色背景的错误信息
+- 📊 **表格展示**：子任务列表使用表格布局
+- 🎨 **颜色主题**：Monokai 主题的 SQL 语法高亮
+
+示例输出样式：
+
+```
+┌─ Generated SQL ─┐
+│ SELECT id, name │
+│ FROM users      │
+│ WHERE age > 18  │
+└─────────────────┘
+```
+
+### 项目展示
+
+<div align="center">
+  <img src="docs/images/demo-screenshot.png" alt="AI SQL Agent Demo" width="800"/>
+  <p><em>图1: AI SQL Agent Web 界面演示</em></p>
+</div>
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x400/1e293b/06b6d4?text=CLI+Demo+Preview" alt="CLI Demo" width="800"/>
+  <p><em>图2: CLI 命令行界面预览（使用 Rich 样式）</em></p>
+</div>
 
 ### 配置
 
@@ -189,8 +242,59 @@ Agent 自动将复杂任务拆分为子任务，逐步执行：
 | 达梦(DM) | `dm` | 达梦数据库语法（SYSDATE/TO_CHAR/NVL 等） |
 | MySQL | `mysql` | MySQL 语法 |
 | PostgreSQL | `postgres` | PostgreSQL 语法 |
-| SQLite | `sqlite` | SQLite 语法 |
+| SQLite | `sqlite` | SQLite 语法（推荐测试使用） |
 | 标准 SQL | `standard` | 默认 |
+
+## 数据库配置
+
+### SQLite 测试配置（推荐）
+
+SQLite 是测试和开发的最佳选择，无需安装数据库服务：
+
+```bash
+# .env 配置
+DB_TYPE=sqlite
+DB_NAME=:memory:  # 内存模式，测试完即销毁
+# 或 DB_NAME=./test.db  # 文件模式，持久化存储
+DB_USER=          # SQLite 不需要用户名
+DB_PASSWORD=      # SQLite 不需要密码
+```
+
+### 达梦数据库配置
+
+```bash
+# .env 配置
+DB_TYPE=dm
+DB_HOST=localhost
+DB_PORT=5236
+DB_NAME=your_database_name
+DB_USER=SYSDBA
+DB_PASSWORD=your_password
+```
+
+### MySQL 配置
+
+```bash
+# .env 配置
+DB_TYPE=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=your_database_name
+DB_USER=root
+DB_PASSWORD=your_password
+```
+
+### PostgreSQL 配置
+
+```bash
+# .env 配置
+DB_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_database_name
+DB_USER=postgres
+DB_PASSWORD=your_password
+```
 
 ## 项目架构
 

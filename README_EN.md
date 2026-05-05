@@ -1,18 +1,20 @@
 <p align="center">
-  <h1 align="center">AI SQL Agent</h1>
+  <h1 align="center">🤖 AI SQL Agent</h1>
   <p align="center">
     <strong>Multi-Model Collaborative AI SQL Agent</strong>
   </p>
   <p align="center">
-    Natural Language → SQL Generation → Execution → Result Analysis
+    🚀 Natural Language → SQL Generation → Execution → Result Analysis
   </p>
   <p align="center">
-    <a href="#features">Features</a> •
-    <a href="#quick-start">Quick Start</a> •
-    <a href="#usage">Usage</a> •
-    <a href="#agent-workflow">Agent Workflow</a> •
-    <a href="#supported-models">Models</a> •
-    <a href="#contributing">Contributing</a> •
+    <a href="https://github.com/SongdDuo/AI-SQL-Agent" target="_blank">🌟 GitHub</a> •
+    <a href="https://github.com/SongdDuo/AI-SQL-Agent/actions" target="_blank">🔄 Actions</a> •
+    <a href="#features">✨ Features</a> •
+    <a href="#quick-start">🚀 Quick Start</a> •
+    <a href="#usage">📖 Usage</a> •
+    <a href="#agent-workflow">🤖 Agent Workflow</a> •
+    <a href="#supported-models">🧠 Models</a> •
+    <a href="#contributing">🤝 Contributing</a> •
     <a href="README.md">中文</a>
   </p>
 </p>
