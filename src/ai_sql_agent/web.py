@@ -252,6 +252,19 @@ body.light{
 }
 .config-row select:focus,.config-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
 
+/* ── Provider Menu ─────────────────────────────────────────── */
+.provider-menu{
+  position:absolute;z-index:100;min-width:200px;
+  background:var(--surface-solid);border:1px solid var(--border);
+  border-radius:var(--radius-sm);box-shadow:var(--glass-shadow);
+  max-height:240px;overflow-y:auto;
+}
+.provider-menu-item{
+  padding:8px 14px;font-size:13px;color:var(--text);cursor:pointer;
+  transition:var(--transition);display:flex;align-items:center;gap:8px;
+}
+.provider-menu-item:hover{background:var(--accent-light);color:var(--accent)}
+
 /* ── Right Panel ──────────────────────────────────────────── */
 .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);transition:var(--transition)}
 
@@ -434,23 +447,8 @@ body.light{
     <div class="config-section">
       <div class="config-row">
         <label>模型</label>
-        <input id="provider" list="providerList" placeholder="输入或选择模型" value="🐱 LongCat" onchange="updateBadge()" />
-        <datalist id="providerList">
-          <option value="🐱 LongCat" label="longcat" />
-          <option value="⚡ LongCat Flash" label="longcat-flash" />
-          <option value="🧠 LongCat Thinking" label="longcat-thinking" />
-          <option value="🎭 LongCat Omni" label="longcat-omni" />
-          <option value="🍃 LongCat Lite" label="longcat-lite" />
-          <option value="🧪 OpenAI GPT-5.5" label="openai" />
-          <option value="🔮 Claude Sonnet 4.6" label="claude" />
-          <option value="🚀 Grok" label="grok" />
-          <option value="🦅 智谱 GLM-5.1" label="glm" />
-          <option value="🐋 DeepSeek-V4" label="deepseek" />
-          <option value="☁️ 通义千问 Qwen3.6" label="qwen" />
-          <option value="🌙 Kimi-K2.6" label="kimi" />
-          <option value="🫘 豆包 Doubao-Seed-1.6" label="doubao" />
-          <option value="💎 元宝 hunyuan-turbo" label="yuanbao" />
-        </datalist>
+        <input id="provider" placeholder="输入模型或点击选择" value="longcat" autocomplete="off" onclick="showProviderMenu()" />
+        <div id="providerMenu" class="provider-menu" style="display:none"></div>
       </div>
       <div class="config-row">
         <label>方言</label>
@@ -527,16 +525,57 @@ const providerLabels = {
   grok:'Grok', glm:'GLM', deepseek:'DeepSeek', qwen:'Qwen', kimi:'Kimi',
   doubao:'Doubao', yuanbao:'Yuanbao'
 };
-function getProviderValue() {
-  const input = document.getElementById('provider');
-  const val = input.value;
-  const opt = document.querySelector('#providerList option[value="' + val.replace(/"/g, '&quot;') + '"]');
-  return opt ? opt.label : val;
-}
+const providerOptions = [
+  {value:'longcat', label:'🐱 LongCat'},
+  {value:'longcat-flash', label:'⚡ LongCat Flash'},
+  {value:'longcat-thinking', label:'🧠 LongCat Thinking'},
+  {value:'longcat-omni', label:'🎭 LongCat Omni'},
+  {value:'longcat-lite', label:'🍃 LongCat Lite'},
+  {value:'openai', label:'🧪 OpenAI GPT-5.5'},
+  {value:'claude', label:'🔮 Claude Sonnet 4.6'},
+  {value:'grok', label:'🚀 Grok'},
+  {value:'glm', label:'🦅 智谱 GLM-5.1'},
+  {value:'deepseek', label:'🐋 DeepSeek-V4'},
+  {value:'qwen', label:'☁️ 通义千问 Qwen3.6'},
+  {value:'kimi', label:'🌙 Kimi-K2.6'},
+  {value:'doubao', label:'🫘 豆包 Doubao-Seed-1.6'},
+  {value:'yuanbao', label:'💎 元宝 hunyuan-turbo'},
+];
 function updateBadge() {
-  const p = getProviderValue();
+  const p = document.getElementById('provider').value;
   document.getElementById('bannerBadge').textContent = providerLabels[p] || p;
 }
+function showProviderMenu() {
+  const menu = document.getElementById('providerMenu');
+  const input = document.getElementById('provider');
+  if (menu.style.display === 'none') {
+    menu.innerHTML = providerOptions.map(o =>
+      `<div class="provider-menu-item" data-value="${o.value}" onclick="selectProvider('${o.value}')">${o.label}</div>`
+    ).join('');
+    menu.style.display = 'block';
+    // 定位到输入框下方
+    const rect = input.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.left = rect.left + 'px';
+    menu.style.top = (rect.bottom + 2) + 'px';
+    menu.style.minWidth = rect.width + 'px';
+  } else {
+    menu.style.display = 'none';
+  }
+}
+function selectProvider(v) {
+  document.getElementById('provider').value = v;
+  document.getElementById('providerMenu').style.display = 'none';
+  updateBadge();
+}
+// 点击其他地方关闭菜单
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('providerMenu');
+  const input = document.getElementById('provider');
+  if (menu && !menu.contains(e.target) && e.target !== input) {
+    menu.style.display = 'none';
+  }
+});
 
 // ── Schema ───────────────────────────────────────────────────
 fetch('/api/schema')
@@ -629,7 +668,7 @@ async function sendQuery() {
   const q = inputEl.value.trim();
   if (!q) return;
 
-  const provider = getProviderValue();
+  const provider = document.getElementById('provider').value.trim();
   const dialect = document.getElementById('dialect').value;
   const apiKey = document.getElementById('apiKey').value.trim();
 

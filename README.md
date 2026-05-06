@@ -23,6 +23,22 @@
 
 ---
 
+## 🌐 在线体验
+
+AI SQL Agent 提供了在线演示页面，内置示例数据库，无需安装即可体验自然语言转 SQL 的完整流程。
+
+<p align="center">
+  <a href="https://songdduo.github.io/AI-SQL-Agent/#quickstart" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_在线演示-立即体验-8b6914?style=for-the-badge" alt="在线演示" />
+  </a>
+</p>
+
+**功能演示**：选择模型 → 输入自然语言 → 自动生成 SQL → 执行并分析结果
+
+👉 **[点击体验在线演示](https://songdduo.github.io/AI-SQL-Agent/#quickstart)**
+
+---
+
 ## 💡 核心痛点
 
 在实际业务中，数据查询严重依赖开发人员手写 SQL，非技术人员无法直接进行数据分析，导致沟通成本高、响应慢。
