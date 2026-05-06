@@ -440,8 +440,8 @@ body.light{
           <option value="longcat-thinking">🧠 LongCat Thinking</option>
           <option value="longcat-omni">🎭 LongCat Omni</option>
           <option value="longcat-lite">🍃 LongCat Lite</option>
-          <option value="openai">🧪 OpenAI GPT</option>
-          <option value="claude">🔮 Claude</option>
+          <option value="openai">🧪 OpenAI GPT-5.5</option>
+          <option value="claude">🔮 Claude Sonnet 4.6</option>
           <option value="grok">🚀 Grok</option>
           <option value="glm">🦅 智谱 GLM</option>
           <option value="deepseek">🐋 DeepSeek</option>

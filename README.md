@@ -243,8 +243,8 @@ print(f"摘要:\n{result['summary']}")
 
 | 提供商 | provider 参数 | 默认模型 | 接口协议 |
 |--------|-------------|---------|---------|
-| OpenAI | `openai` | gpt-4o | OpenAI |
-| Anthropic Claude | `claude` | claude-sonnet-4-20250514 | Anthropic |
+| OpenAI | `openai` | GPT-5.5 | OpenAI |
+| Anthropic Claude | `claude` | claude-sonnet-4-6 / opus-4-7 | Anthropic |
 | xAI Grok | `grok` | grok-4-1-fast | OpenAI 兼容 |
 
 ### 🇨🇳 国产主流

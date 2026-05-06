@@ -86,7 +86,7 @@ PROVIDER_PRESETS = {
     # OpenAI
     "openai": {
         "base_url": "https://api.openai.com/v1",
-        "model": "gpt-4o",
+        "model": "gpt-5.5",
     },
     # 智谱 GLM
     "glm": {
@@ -101,7 +101,7 @@ PROVIDER_PRESETS = {
     # Anthropic Claude
     "claude": {
         "base_url": "https://api.anthropic.com",
-        "model": "claude-sonnet-4-20250514",
+        "model": "claude-sonnet-4-6",
     },
     # DeepSeek
     "deepseek": {
