@@ -91,12 +91,12 @@ PROVIDER_PRESETS = {
     # 智谱 GLM
     "glm": {
         "base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "model": "glm-4-plus",
+        "model": "GLM-5.1",
     },
     # 小米 MiMo
     "mimo": {
         "base_url": "https://api.xiaomimimo.com/v1",
-        "model": "mimo-v2.5",
+        "model": "MiniMax-M2.5",
     },
     # Anthropic Claude
     "claude": {
@@ -106,22 +106,22 @@ PROVIDER_PRESETS = {
     # DeepSeek
     "deepseek": {
         "base_url": "https://api.deepseek.com/v1",
-        "model": "deepseek-chat",
+        "model": "DeepSeek-V4",
     },
     # 阿里通义千问
     "qwen": {
         "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "model": "qwen-plus",
+        "model": "Qwen3.6",
     },
     # 月之暗面 Kimi
     "kimi": {
         "base_url": "https://api.moonshot.cn/v1",
-        "model": "kimi-k2.6",
+        "model": "Kimi-K2.6",
     },
     # 字节跳动 豆包（火山方舟）
     "doubao": {
         "base_url": "https://ark.cn-beijing.volces.com/api/v3",
-        "model": "doubao-pro-32k",
+        "model": "Doubao-Seed-1.6",
     },
     # 腾讯混元 元宝
     "yuanbao": {

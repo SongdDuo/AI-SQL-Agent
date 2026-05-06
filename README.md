@@ -251,12 +251,12 @@ print(f"摘要:\n{result['summary']}")
 
 | 提供商 | provider 参数 | 默认模型 | 接口协议 |
 |--------|-------------|---------|---------|
-| 智谱 GLM | `glm` | glm-4-plus | OpenAI 兼容 |
+| 智谱 GLM | `glm` | GLM-5.1 | OpenAI 兼容 |
 | 小米 MiMo | `mimo` | mimo-v2.5 | OpenAI 兼容 |
-| DeepSeek | `deepseek` | deepseek-chat | OpenAI 兼容 |
-| 阿里通义 | `qwen` | qwen-plus | OpenAI 兼容 |
-| 月之暗面 Kimi | `kimi` | kimi-k2.6 | OpenAI 兼容 |
-| 字节豆包 | `doubao` | doubao-pro-32k | OpenAI 兼容 |
+| DeepSeek | `deepseek` | DeepSeek-V4 | OpenAI 兼容 |
+| 阿里通义 | `qwen` | Qwen3.6 | OpenAI 兼容 |
+| 月之暗面 Kimi | `kimi` | Kimi-K2.6 | OpenAI 兼容 |
+| 字节豆包 | `doubao` | Doubao-Seed-1.6 | OpenAI 兼容 |
 | 腾讯元宝 | `yuanbao` | hunyuan-turbo | OpenAI 兼容 |
 
 ### 🔄 通用中转站

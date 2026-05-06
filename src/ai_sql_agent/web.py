@@ -125,12 +125,15 @@ def init_sample_db(db_config: DBConfig):
 
 # ── HTML Template ────────────────────────────────────────────────────────────
 
-HTML_TEMPLATE = r"""<!DOCTYPE html>
+FAVICON_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f13'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='SF%20Mono,Consolas,monospace' font-size='28' font-weight='700' fill='%23c9a97a'%3ESQL%3C/text%3E%3C/svg%3E"
+
+HTML_TEMPLATE = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI SQL Agent</title>
+<link rel="icon" href="{FAVICON_SVG}" type="image/svg+xml">
 <style>
 /* ── Reset & Base ─────────────────────────────────────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
