@@ -261,6 +261,15 @@ src/ai_sql_agent/
 - 🔧 **Auto SQL fix** reduces manual intervention
 - 💬 **Multi-turn conversation** eliminates repetitive context
 
+## 🔗 Project Links
+
+| Type | URL |
+|------|-----|
+| 🌟 GitHub Repository | https://github.com/SongdDuo/AI-SQL-Agent |
+| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
+| 📦 PyPI Package | https://pypi.org/project/ai-sql-agent/ |
+| 📄 Documentation | https://github.com/SongdDuo/AI-SQL-Agent#readme |
+
 ## 🤝 Contributing
 
 Contributions welcome!

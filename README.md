@@ -274,6 +274,15 @@ src/ai_sql_agent/
 - 🔧 **SQL 执行失败自动修复，减少人工干预**
 - 💬 **多轮对话支持，连续提问无需重复上下文**
 
+## 🔗 项目链接
+
+| 类型 | 地址 |
+|------|------|
+| 🌟 GitHub 仓库 | https://github.com/SongdDuo/AI-SQL-Agent |
+| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
+| 📦 PyPI 包 | https://pypi.org/project/ai-sql-agent/ |
+| 📄 在线文档 | https://github.com/SongdDuo/AI-SQL-Agent#readme |
+
 ## 🤝 贡献指南
 
 欢迎贡献！步骤：
