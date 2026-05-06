@@ -133,7 +133,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI SQL Agent</title>
-<link rel="icon" href="{FAVICON_SVG}" type="image/svg+xml">
+<link rel="icon" href="__FAVICON_SVG__" type="image/svg+xml">
 <style>
 /* ── Reset & Base ─────────────────────────────────────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -693,7 +693,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
-            self.wfile.write(HTML_TEMPLATE.format(FAVICON_SVG=FAVICON_SVG).encode('utf-8'))
+            self.wfile.write(HTML_TEMPLATE.replace("__FAVICON_SVG__", FAVICON_SVG).encode('utf-8'))
         elif self.path == '/api/schema':
             self._json(self._get_schema())
         else:
