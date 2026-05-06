@@ -448,7 +448,6 @@ body.light{
       <div class="config-row">
         <label>模型</label>
         <input id="provider" placeholder="输入模型或点击选择" value="longcat" autocomplete="off" onclick="showProviderMenu()" />
-        <div id="providerMenu" class="provider-menu" style="display:none"></div>
       </div>
       <div class="config-row">
         <label>方言</label>
@@ -556,17 +555,18 @@ function showProviderMenu() {
     const rect = input.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const maxH = 240;
+    const maxH = 260;
     menu.style.position = 'fixed';
     menu.style.left = rect.left + 'px';
     menu.style.minWidth = rect.width + 'px';
-    // 优先显示在下方，空间不足时显示在上方
-    if (spaceBelow >= maxH || spaceBelow >= spaceAbove) {
-      menu.style.top = (rect.bottom + 2) + 'px';
-      menu.style.maxHeight = Math.min(maxH, spaceBelow - 8) + 'px';
+    // 优先下方；下方不够则翻到上方
+    if (spaceBelow >= 160 || spaceBelow >= spaceAbove) {
+      menu.style.top = (rect.bottom + 4) + 'px';
+      menu.style.maxHeight = Math.min(maxH, Math.max(spaceBelow - 8, 120)) + 'px';
     } else {
-      menu.style.top = (rect.top - Math.min(maxH, spaceAbove - 8) - 2) + 'px';
-      menu.style.maxHeight = Math.min(maxH, spaceAbove - 8) + 'px';
+      const h = Math.min(maxH, Math.max(spaceAbove - 8, 120));
+      menu.style.top = (rect.top - h - 4) + 'px';
+      menu.style.maxHeight = h + 'px';
     }
   } else {
     menu.style.display = 'none';
@@ -733,6 +733,7 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 </script>
+<div id="providerMenu" class="provider-menu" style="display:none"></div>
 </body>
 </html>"""
 
