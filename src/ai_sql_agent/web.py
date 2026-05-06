@@ -559,15 +559,26 @@ function showProviderMenu() {
     menu.style.position = 'fixed';
     menu.style.left = rect.left + 'px';
     menu.style.minWidth = rect.width + 'px';
-    // 优先下方；下方不够则翻到上方
-    if (spaceBelow >= 160 || spaceBelow >= spaceAbove) {
+    // 计算菜单高度
+    const itemH = 38;
+    const totalH = Math.min(providerOptions.length * itemH, maxH);
+    // 哪边空间大放哪边
+    if (spaceBelow >= spaceAbove) {
       menu.style.top = (rect.bottom + 4) + 'px';
-      menu.style.maxHeight = Math.min(maxH, Math.max(spaceBelow - 8, 120)) + 'px';
+      menu.style.maxHeight = Math.min(totalH, spaceBelow - 4) + 'px';
     } else {
-      const h = Math.min(maxH, Math.max(spaceAbove - 8, 120));
+      const h = Math.min(totalH, spaceAbove - 4);
       menu.style.top = (rect.top - h - 4) + 'px';
       menu.style.maxHeight = h + 'px';
     }
+    // 兜底：确保菜单底部不超出视口
+    requestAnimationFrame(function() {
+      const menuRect = menu.getBoundingClientRect();
+      if (menuRect.bottom > window.innerHeight) {
+        const overflow = menuRect.bottom - window.innerHeight;
+        menu.style.top = (parseInt(menu.style.top) - overflow - 4) + 'px';
+      }
+    });
   } else {
     menu.style.display = 'none';
   }
