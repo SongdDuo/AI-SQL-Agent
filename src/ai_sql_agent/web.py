@@ -553,12 +553,21 @@ function showProviderMenu() {
       `<div class="provider-menu-item" data-value="${o.value}" onclick="selectProvider('${o.value}')">${o.label}</div>`
     ).join('');
     menu.style.display = 'block';
-    // 定位到输入框下方
     const rect = input.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const maxH = 240;
     menu.style.position = 'fixed';
     menu.style.left = rect.left + 'px';
-    menu.style.top = (rect.bottom + 2) + 'px';
     menu.style.minWidth = rect.width + 'px';
+    // 优先显示在下方，空间不足时显示在上方
+    if (spaceBelow >= maxH || spaceBelow >= spaceAbove) {
+      menu.style.top = (rect.bottom + 2) + 'px';
+      menu.style.maxHeight = Math.min(maxH, spaceBelow - 8) + 'px';
+    } else {
+      menu.style.top = (rect.top - Math.min(maxH, spaceAbove - 8) - 2) + 'px';
+      menu.style.maxHeight = Math.min(maxH, spaceAbove - 8) + 'px';
+    }
   } else {
     menu.style.display = 'none';
   }
