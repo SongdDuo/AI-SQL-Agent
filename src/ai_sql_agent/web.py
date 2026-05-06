@@ -137,36 +137,36 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;overflow:hidden;height:100vh;transition:background .35s,color .35s}
 
-/* ── CSS Variables — Light (default) ─────────────────────── */
+/* ── Claude-style Dark Theme (default) ────────────────────── */
 :root{
-  --bg:#f5f5f7;--bg2:#ffffff;--surface:rgba(255,255,255,.72);--surface-solid:#ffffff;
-  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);
-  --text:#1d1d1f;--text2:#636366;--text3:#8e8e93;
-  --accent:#0071e3;--accent-hover:#0077ed;--accent-light:rgba(0,113,227,.1);
-  --green:#34c759;--green-bg:rgba(52,199,89,.1);
-  --red:#ff3b30;--red-bg:rgba(255,59,48,.08);
-  --orange:#ff9500;--orange-bg:rgba(255,149,0,.1);
-  --purple:#af52de;
-  --glass:rgba(255,255,255,.65);--glass-border:rgba(255,255,255,.45);
-  --glass-shadow:0 8px 32px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+  --bg:#1a1a2e;--bg2:#16213e;--surface:rgba(25,30,55,.78);--surface-solid:#1e2a4a;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --text:#e8e8ed;--text2:#b0b0c0;--text3:#7a7a8a;
+  --accent:#60a5fa;--accent-hover:#93bbfd;--accent-light:rgba(96,165,250,.12);
+  --accent2:#38bdf8;--accent2-hover:#7dd3fc;
+  --green:#34d399;--green-bg:rgba(52,211,153,.1);
+  --red:#f87171;--red-bg:rgba(248,113,113,.08);
+  --orange:#fbbf24;--orange-bg:rgba(251,191,36,.1);
+  --glass:rgba(25,30,55,.7);--glass-border:rgba(167,139,250,.15);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.25),0 2px 8px rgba(0,0,0,.15);
   --glass-blur:40px;
-  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --radius:18px;--radius-sm:12px;--radius-xs:8px;
   --mono:"SF Mono","JetBrains Mono","Fira Code",Menlo,monospace;
   --transition:all .25s cubic-bezier(.4,0,.2,1);
 }
 
-/* ── Dark Theme ───────────────────────────────────────────── */
-body.dark{
-  --bg:#000000;--bg2:#1c1c1e;--surface:rgba(28,28,30,.72);--surface-solid:#1c1c1e;
-  --border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.16);
-  --text:#f5f5f7;--text2:#a1a1a6;--text3:#8e8e93;
-  --accent:#0a84ff;--accent-hover:#409cff;--accent-light:rgba(10,132,255,.15);
-  --green:#30d158;--green-bg:rgba(48,209,88,.12);
-  --red:#ff453a;--red-bg:rgba(255,69,58,.1);
-  --orange:#ff9f0a;--orange-bg:rgba(255,159,10,.12);
-  --purple:#bf5af2;
-  --glass:rgba(28,28,30,.65);--glass-border:rgba(255,255,255,.12);
-  --glass-shadow:0 8px 32px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.2);
+/* ── Light Theme ───────────────────────────────────────────── */
+body.light{
+  --bg:#f8f7fc;--bg2:#ffffff;--surface:rgba(255,255,255,.78);--surface-solid:#ffffff;
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.11);
+  --text:#1e1e2e;--text2:#5a5a6e;--text3:#8e8ea0;
+  --accent:#2563eb;--accent-hover:#3b82f6;--accent-light:rgba(37,99,235,.08);
+  --accent2:#0891b2;--accent2-hover:#06b6d4;
+  --green:#059669;--green-bg:rgba(5,150,105,.08);
+  --red:#dc2626;--red-bg:rgba(220,38,38,.06);
+  --orange:#d97706;--orange-bg:rgba(217,119,6,.08);
+  --glass:rgba(255,255,255,.7);--glass-border:rgba(124,58,237,.1);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.03);
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */
@@ -282,7 +282,7 @@ body.dark{
   display:flex;align-items:center;justify-content:center;font-size:14px;
   margin-top:4px;
 }
-.msg.assistant .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--purple))}
+.msg.assistant .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .msg.user .msg-avatar{background:linear-gradient(135deg,var(--green),var(--accent))}
 .msg-bubble{
   padding:12px 16px;border-radius:var(--radius-sm);font-size:14px;
@@ -412,7 +412,7 @@ body.dark{
     <div class="banner-badge" id="bannerBadge">LongCat-2.0</div>
   </div>
   <div class="banner-right">
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题">🌙</button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题">☀️</button>
   </div>
 </div>
 
@@ -496,16 +496,16 @@ body.dark{
 <script>
 // ── Theme ─────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('aistheme');
-if (savedTheme === 'dark') document.body.classList.add('dark');
+if (savedTheme === 'light') document.body.classList.add('light');
 updateThemeIcon();
 
 function toggleTheme() {
-  document.body.classList.toggle('dark');
-  localStorage.setItem('aistheme', document.body.classList.contains('dark') ? 'dark' : 'light');
+  document.body.classList.toggle('light');
+  localStorage.setItem('aistheme', document.body.classList.contains('light') ? 'light' : 'dark');
   updateThemeIcon();
 }
 function updateThemeIcon() {
-  document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
 }
 
 // ── Sidebar (mobile) ─────────────────────────────────────────
