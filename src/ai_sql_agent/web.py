@@ -137,17 +137,18 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;overflow:hidden;height:100vh;transition:background .35s,color .35s}
 
-/* ── Claude-style Dark Theme (default) ────────────────────── */
+/* ── Design Tokens — Claude Style (Dark default) ──────────── */
 :root{
-  --bg:#1a1a2e;--bg2:#16213e;--surface:rgba(25,30,55,.78);--surface-solid:#1e2a4a;
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
-  --text:#e8e8ed;--text2:#b0b0c0;--text3:#7a7a8a;
-  --accent:#60a5fa;--accent-hover:#93bbfd;--accent-light:rgba(96,165,250,.12);
-  --accent2:#38bdf8;--accent2-hover:#7dd3fc;
-  --green:#34d399;--green-bg:rgba(52,211,153,.1);
-  --red:#f87171;--red-bg:rgba(248,113,113,.08);
-  --orange:#fbbf24;--orange-bg:rgba(251,191,36,.1);
-  --glass:rgba(25,30,55,.7);--glass-border:rgba(167,139,250,.15);
+  --bg:#0f0f13;--bg2:#18181d;--bg3:#1e1e24;
+  --surface:rgba(255,255,255,.03);--surface-hover:rgba(255,255,255,.06);--surface-solid:#1e1e24;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#e8e6e3;--text2:#9a9a9e;--text3:#5c5c64;
+  --accent:#c9a97a;--accent-hover:#d4b88f;--accent-light:rgba(201,169,122,.08);--accent-light2:rgba(201,169,122,.14);
+  --accent2:#b8956a;--accent2-hover:#c9a97a;
+  --green:#7fb885;--green-bg:rgba(127,184,133,.08);
+  --red:#c97b7b;--red-bg:rgba(201,123,123,.08);
+  --orange:#d4a853;--orange-bg:rgba(212,168,83,.08);
+  --glass:rgba(30,30,36,.7);--glass-border:rgba(201,169,122,.1);
   --glass-shadow:0 8px 32px rgba(0,0,0,.25),0 2px 8px rgba(0,0,0,.15);
   --glass-blur:40px;
   --radius:18px;--radius-sm:12px;--radius-xs:8px;
@@ -157,16 +158,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 
 /* ── Light Theme ───────────────────────────────────────────── */
 body.light{
-  --bg:#f8f7fc;--bg2:#ffffff;--surface:rgba(255,255,255,.78);--surface-solid:#ffffff;
-  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.11);
-  --text:#1e1e2e;--text2:#5a5a6e;--text3:#8e8ea0;
-  --accent:#2563eb;--accent-hover:#3b82f6;--accent-light:rgba(37,99,235,.08);
-  --accent2:#0891b2;--accent2-hover:#06b6d4;
-  --green:#059669;--green-bg:rgba(5,150,105,.08);
-  --red:#dc2626;--red-bg:rgba(220,38,38,.06);
-  --orange:#d97706;--orange-bg:rgba(217,119,6,.08);
-  --glass:rgba(255,255,255,.7);--glass-border:rgba(124,58,237,.1);
-  --glass-shadow:0 8px 32px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.03);
+  --bg:#f8f7f5;--bg2:#ffffff;--bg3:#f0efed;
+  --surface:rgba(0,0,0,.02);--surface-hover:rgba(0,0,0,.04);--surface-solid:#ffffff;
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#1e1e2e;--text2:#6a6a72;--text3:#9a9a9e;
+  --accent:#8b6914;--accent-hover:#a67c1a;--accent-light:rgba(139,105,20,.06);--accent-light2:rgba(139,105,20,.1);
+  --accent2:#7a5c10;--accent2-hover:#8b6914;
+  --green:#3d7a44;--green-bg:rgba(61,122,68,.06);
+  --red:#a34e4e;--red-bg:rgba(163,78,78,.05);
+  --orange:#b8860b;--orange-bg:rgba(184,134,11,.06);
+  --glass:rgba(255,255,255,.7);--glass-border:rgba(139,105,20,.08);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.02);
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */
