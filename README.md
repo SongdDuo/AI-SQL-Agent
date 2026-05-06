@@ -51,6 +51,26 @@
                   └─────────────────────────────────────────────────────────────┘
 ```
 
+## 📊 实际效果
+
+### 🌐 Web UI 界面
+
+AI SQL Agent 提供了基于浏览器的 Web UI，内置示例数据库，支持自然语言查询、SQL 生成、结果展示和 AI 分析，无需配置即可体验完整流程。
+
+<p align="center">
+  <img src="docs/screenshots/web-ui-demo.png" alt="Web UI 演示" width="900" />
+</p>
+
+> 启动命令：`ai-sql web --port 8080`，然后打开浏览器访问 `http://127.0.0.1:8080`
+
+### 📈 效果数据
+
+- ⚡ **数据查询效率提升约 60%~80%**
+- 👥 **非技术用户可直接完成基础分析任务**
+- ✅ **在测试场景中，大部分常见分析问题可自动生成正确 SQL**
+- 🔧 **SQL 执行失败自动修复，减少人工干预**
+- 💬 **多轮对话支持，连续提问无需重复上下文**
+
 ### 🔄 Tool Calling 循环
 
 1. 📝 用户输入自然语言问题（如"近30天订单趋势"）
@@ -81,15 +101,6 @@
 - 🕵️ **Schema 感知** — 连接数据库后，AI 自动理解表结构生成精准 SQL
 - 💬 **多轮对话** — 支持连续提问，维护上下文理解
 - 🛠️ **CLI & SDK** — 命令行工具 + Python SDK，灵活集成
-
-## 🔗 项目链接
-
-| 类型 | 地址 |
-|------|------|
-| 🌟 GitHub 仓库 | https://github.com/SongdDuo/AI-SQL-Agent |
-| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
-| 📦 PyPI 包 | https://pypi.org/project/ai-sql-agent/ |
-| 📄 在线文档 | https://github.com/SongdDuo/AI-SQL-Agent#readme |
 
 ## 🚀 快速开始
 
@@ -338,25 +349,14 @@ src/ai_sql_agent/
     └── formatter.py   # SQL 格式化
 ```
 
-## 📊 实际效果
+## 🔗 项目链接
 
-### 🌐 Web UI 界面
-
-AI SQL Agent 提供了基于浏览器的 Web UI，内置示例数据库，支持自然语言查询、SQL 生成、结果展示和 AI 分析，无需配置即可体验完整流程。
-
-<p align="center">
-  <img src="docs/screenshots/web-ui-demo.png" alt="Web UI 演示" width="900" />
-</p>
-
-> 启动命令：`ai-sql web --port 8080`，然后打开浏览器访问 `http://127.0.0.1:8080`
-
-### 📈 效果数据
-
-- ⚡ **数据查询效率提升约 60%~80%**
-- 👥 **非技术用户可直接完成基础分析任务**
-- ✅ **在测试场景中，大部分常见分析问题可自动生成正确 SQL**
-- 🔧 **SQL 执行失败自动修复，减少人工干预**
-- 💬 **多轮对话支持，连续提问无需重复上下文**
+| 类型 | 地址 |
+|------|------|
+| 🌟 GitHub 仓库 | https://github.com/SongdDuo/AI-SQL-Agent |
+| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
+| 📦 PyPI 包 | https://pypi.org/project/ai-sql-agent/ |
+| 📄 在线文档 | https://github.com/SongdDuo/AI-SQL-Agent#readme |
 
 ## 🤝 贡献指南
 
