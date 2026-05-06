@@ -127,7 +127,7 @@ def init_sample_db(db_config: DBConfig):
 
 FAVICON_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f13'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='SF%20Mono,Consolas,monospace' font-size='28' font-weight='700' fill='%23c9a97a'%3ESQL%3C/text%3E%3C/svg%3E"
 
-HTML_TEMPLATE = f"""<!DOCTYPE html>
+HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -693,7 +693,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
-            self.wfile.write(HTML_TEMPLATE.encode('utf-8'))
+            self.wfile.write(HTML_TEMPLATE.format(FAVICON_SVG=FAVICON_SVG).encode('utf-8'))
         elif self.path == '/api/schema':
             self._json(self._get_schema())
         else:
