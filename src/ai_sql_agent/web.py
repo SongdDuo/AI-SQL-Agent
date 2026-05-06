@@ -434,7 +434,8 @@ body.light{
     <div class="config-section">
       <div class="config-row">
         <label>模型</label>
-        <select id="provider" onchange="updateBadge()">
+        <input id="provider" list="providerList" placeholder="输入或选择模型" value="longcat" onchange="updateBadge()" />
+        <datalist id="providerList">
           <option value="longcat">🐱 LongCat</option>
           <option value="longcat-flash">⚡ LongCat Flash</option>
           <option value="longcat-thinking">🧠 LongCat Thinking</option>
@@ -443,13 +444,13 @@ body.light{
           <option value="openai">🧪 OpenAI GPT-5.5</option>
           <option value="claude">🔮 Claude Sonnet 4.6</option>
           <option value="grok">🚀 Grok</option>
-          <option value="glm">🦅 智谱 GLM</option>
-          <option value="deepseek">🐋 DeepSeek</option>
-          <option value="qwen">☁️ 通义千问</option>
-          <option value="kimi">🌙 Kimi</option>
-          <option value="doubao">🫘 豆包</option>
-          <option value="yuanbao">💎 元宝</option>
-        </select>
+          <option value="glm">🦅 智谱 GLM-5.1</option>
+          <option value="deepseek">🐋 DeepSeek-V4</option>
+          <option value="qwen">☁️ 通义千问 Qwen3.6</option>
+          <option value="kimi">🌙 Kimi-K2.6</option>
+          <option value="doubao">🫘 豆包 Doubao-Seed-1.6</option>
+          <option value="yuanbao">💎 元宝 hunyuan-turbo</option>
+        </datalist>
       </div>
       <div class="config-row">
         <label>方言</label>
@@ -462,7 +463,7 @@ body.light{
         </select>
       </div>
       <div class="config-row">
-        <label>Key</label>
+        <label>API Key</label>
         <input type="password" id="apiKey" placeholder="留空使用 .env 配置" />
       </div>
     </div>
@@ -522,7 +523,7 @@ function toggleSidebar() {
 // ── Badge ────────────────────────────────────────────────────
 const providerLabels = {
   longcat:'LongCat-2.0', 'longcat-flash':'Flash', 'longcat-thinking':'Thinking',
-  'longcat-omni':'Omni', 'longcat-lite':'Lite', openai:'GPT', claude:'Claude',
+  'longcat-omni':'Omni', 'longcat-lite':'Lite', openai:'GPT-5.5', claude:'Claude 4.6',
   grok:'Grok', glm:'GLM', deepseek:'DeepSeek', qwen:'Qwen', kimi:'Kimi',
   doubao:'Doubao', yuanbao:'Yuanbao'
 };
