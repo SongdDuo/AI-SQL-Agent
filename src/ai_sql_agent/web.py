@@ -1,24 +1,22 @@
-"""Web UI for AI SQL Agent — built-in HTTP server with interactive demo."""
+"""Web UI for AI SQL Agent — Apple-style glassmorphism design."""
 
 import json
 import logging
 import os
 import sqlite3
 import sys
+import tempfile
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
 
 # Fix Windows encoding
 if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from .agent import SQLAgent
 from .assistant import SQLAssistant
-from .config import DBConfig, build_provider, PROVIDER_PRESETS
-from .db.connector import DBConnector
+from .config import DBConfig, build_provider
 from .db.dialects import DialectType
 
 logger = logging.getLogger(__name__)
@@ -32,7 +30,6 @@ CREATE TABLE IF NOT EXISTS department (
     location VARCHAR(200),
     budget DECIMAL(15,2)
 );
-
 CREATE TABLE IF NOT EXISTS employee (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -43,7 +40,6 @@ CREATE TABLE IF NOT EXISTS employee (
     status INTEGER DEFAULT 1,
     FOREIGN KEY (department_id) REFERENCES department(id)
 );
-
 CREATE TABLE IF NOT EXISTS customer (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -51,7 +47,6 @@ CREATE TABLE IF NOT EXISTS customer (
     city VARCHAR(100),
     register_date DATE
 );
-
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER,
@@ -60,7 +55,6 @@ CREATE TABLE IF NOT EXISTS orders (
     create_time DATETIME,
     FOREIGN KEY (customer_id) REFERENCES customer(id)
 );
-
 CREATE TABLE IF NOT EXISTS product (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(200) NOT NULL,
@@ -77,7 +71,6 @@ INSERT OR IGNORE INTO department (id, name, location, budget) VALUES
 (3, '市场部', '广州', 2000000),
 (4, '人事部', '深圳', 1500000),
 (5, '财务部', '北京', 1800000);
-
 INSERT OR IGNORE INTO employee (id, name, email, salary, hire_date, department_id, status) VALUES
 (1, '张三', 'zhangsan@example.com', 25000, '2022-03-15', 1, 1),
 (2, '李四', 'lisi@example.com', 18000, '2023-01-10', 1, 1),
@@ -89,14 +82,12 @@ INSERT OR IGNORE INTO employee (id, name, email, salary, hire_date, department_i
 (8, '吴十', 'wushi@example.com', 12000, '2024-06-10', 4, 1),
 (9, '郑十一', 'zhengshiyi@example.com', 19000, '2023-03-25', 5, 1),
 (10, '王十二', 'wangshier@example.com', 35000, '2019-08-12', 1, 1);
-
 INSERT OR IGNORE INTO customer (id, name, email, city, register_date) VALUES
 (1, '客户A', 'a@example.com', '北京', '2024-01-15'),
 (2, '客户B', 'b@example.com', '上海', '2024-03-20'),
 (3, '客户C', 'c@example.com', '广州', '2024-05-10'),
 (4, '客户D', 'd@example.com', '深圳', '2024-06-01'),
 (5, '客户E', 'e@example.com', '杭州', '2024-08-15');
-
 INSERT OR IGNORE INTO orders (id, customer_id, total_amount, status, create_time) VALUES
 (1, 1, 15800, 1, '2025-04-01 10:30:00'),
 (2, 2, 23500, 1, '2025-04-05 14:20:00'),
@@ -110,7 +101,6 @@ INSERT OR IGNORE INTO orders (id, customer_id, total_amount, status, create_time
 (10, 5, 28700, 1, '2025-05-01 12:10:00'),
 (11, 4, 41300, 1, '2025-05-03 14:00:00'),
 (12, 2, 16800, 1, '2025-05-05 09:30:00');
-
 INSERT OR IGNORE INTO product (id, name, category, price, stock) VALUES
 (1, '笔记本电脑', '电子产品', 6999, 120),
 (2, '机械键盘', '电子产品', 599, 300),
@@ -140,237 +130,483 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🤖 AI SQL Agent</title>
+<title>AI SQL Agent</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0e17;--surface:#111827;--surface2:#1e293b;--border:#1e3a5f;--cyan:#06b6d4;--green:#10b981;--purple:#8b5cf6;--orange:#f59e0b;--red:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;--mono:"JetBrains Mono","Fira Code",Consolas,monospace}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.7;overflow-x:hidden}
-a{color:var(--cyan);text-decoration:none}
-.container{max-width:960px;margin:0 auto;padding:0 20px}
+/* ── Reset & Base ─────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;overflow:hidden;height:100vh;transition:background .35s,color .35s}
 
-/* Header */
-.header{padding:20px 0;border-bottom:1px solid var(--border);background:rgba(10,14,23,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
-.header .container{display:flex;align-items:center;justify-content:space-between}
-.logo{font-weight:700;font-size:20px;color:#fff}
-.logo span{color:var(--cyan)}
-.badge{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-size:12px;color:var(--cyan)}
-.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* Main */
-.main{padding:30px 0}
-
-/* Config bar */
-.config-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-.config-bar label{font-size:13px;color:var(--text2)}
-.config-bar select,.config-bar input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--font)}
-.config-bar select:focus,.config-bar input:focus{outline:none;border-color:var(--cyan)}
-.config-bar input{width:260px}
-
-/* Schema panel */
-.schema-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px}
-.schema-panel h3{font-size:14px;color:var(--cyan);margin-bottom:10px}
-.schema-table{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin:4px;font-size:12px}
-.schema-table .tname{font-weight:600;color:var(--green);margin-bottom:4px}
-.schema-table .tcols{color:var(--text3);line-height:1.5}
-
-/* Chat area */
-.chat-area{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.chat-messages{height:420px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.msg{display:flex;gap:10px;max-width:85%}
-.msg.user{align-self:flex-end;flex-direction:row-reverse}
-.msg .avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.msg.assistant .avatar{background:rgba(6,182,212,.15)}
-.msg.user .avatar;background:rgba(139,92,246,.15)}
-.msg .bubble{padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.6}
-.msg.assistant .bubble{background:var(--surface2);border:1px solid var(--border)}
-.msg.user .bubble;background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.3)}
-.msg .bubble .sql-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin:8px 0;font-family:var(--mono);font-size:12px;white-space:pre-wrap;overflow-x:auto;color:var(--green)}
-.msg .bubble .result-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
-.msg .bubble .result-table th,.msg .bubble .result-table td{border:1px solid var(--border);padding:4px 8px;text-align:left}
-.msg .bubble .result-table th{background:var(--surface2);color:var(--cyan)}
-.msg .bubble .result-table tr:nth-child(even){background:rgba(30,41,59,.5)}
-.msg .bubble .error{color:var(--red);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:8px;margin:8px 0}
-.msg .bubble .info{color:var(--orange);font-size:12px;margin-top:4px}
-
-/* Loading dots */
-.loading{display:flex;gap:4px;padding:4px 0}
-.loading span{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:bounce .6s infinite}
-.loading span:nth-child(2){animation-delay:.15s}
-.loading span:nth-child(3){animation-delay:.3s}
-@keyframes bounce{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
-
-/* Input area */
-.chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:var(--surface2)}
-.chat-input input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 12px;font-size:14px;font-family:var(--font)}
-.chat-input input:focus{outline:none;border-color:var(--cyan)}
-.chat-input button{background:var(--cyan);color:#000;border:none;border-radius:6px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.chat-input button:hover{background:#22d3ee}
-.chat-input button:disabled{opacity:.5;cursor:not-allowed}
-
-/* Examples */
-.examples{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--border);background:rgba(17,24,39,.5)}
-.examples button{background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;transition:all .2s}
-.examples button:hover{border-color:var(--cyan);color:var(--cyan)}
-
-@media(max-width:640px){
-  .config-bar{flex-direction:column;align-items:stretch}
-  .config-bar input{width:100%}
-  .chat-messages{height:350px}
+/* ── CSS Variables — Light (default) ─────────────────────── */
+:root{
+  --bg:#f5f5f7;--bg2:#ffffff;--surface:rgba(255,255,255,.72);--surface-solid:#ffffff;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);
+  --text:#1d1d1f;--text2:#6e6e73;--text3:#86868b;
+  --accent:#0071e3;--accent-hover:#0077ed;--accent-light:rgba(0,113,227,.1);
+  --green:#34c759;--green-bg:rgba(52,199,89,.1);
+  --red:#ff3b30;--red-bg:rgba(255,59,48,.08);
+  --orange:#ff9500;--orange-bg:rgba(255,149,0,.1);
+  --purple:#af52de;
+  --glass:rgba(255,255,255,.65);--glass-border:rgba(255,255,255,.45);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+  --glass-blur:40px;
+  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --mono:"SF Mono","JetBrains Mono","Fira Code",Menlo,monospace;
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
 }
+
+/* ── Dark Theme ───────────────────────────────────────────── */
+body.dark{
+  --bg:#000000;--bg2:#1c1c1e;--surface:rgba(28,28,30,.72);--surface-solid:#1c1c1e;
+  --border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.16);
+  --text:#f5f5f7;--text2:#86868b;--text3:#636366;
+  --accent:#0a84ff;--accent-hover:#409cff;--accent-light:rgba(10,132,255,.15);
+  --green:#30d158;--green-bg:rgba(48,209,88,.12);
+  --red:#ff453a;--red-bg:rgba(255,69,58,.1);
+  --orange:#ff9f0a;--orange-bg:rgba(255,159,10,.12);
+  --purple:#bf5af2;
+  --glass:rgba(28,28,30,.65);--glass-border:rgba(255,255,255,.12);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.2);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text2)}
+
+/* ── Banner ───────────────────────────────────────────────── */
+.banner{
+  height:52px;flex-shrink:0;
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:relative;z-index:50;
+  transition:var(--transition);
+}
+.banner-left{display:flex;align-items:center;gap:10px}
+.banner-logo{font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.banner-logo em{font-style:normal;color:var(--accent)}
+.banner-badge{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+  background:var(--accent-light);color:var(--accent);
+}
+.banner-right{display:flex;align-items:center;gap:12px}
+
+/* Theme toggle */
+.theme-btn{
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  transition:var(--transition);
+}
+.theme-btn:hover{background:var(--accent-light);border-color:var(--accent);transform:scale(1.05)}
+
+/* ── Layout ───────────────────────────────────────────────── */
+.app{display:flex;height:calc(100vh - 52px);overflow:hidden}
+
+/* ── Left Panel ───────────────────────────────────────────── */
+.left-panel{
+  width:340px;min-width:280px;max-width:420px;flex-shrink:0;
+  background:var(--surface);
+  backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  transition:var(--transition);
+}
+.panel-header{
+  padding:16px 18px 12px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* Schema section */
+.schema-section{flex:1;overflow-y:auto;padding:12px}
+.schema-group{margin-bottom:12px}
+.schema-group-title{
+  font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.8px;padding:4px 6px 8px;
+}
+.schema-card{
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px 14px;margin-bottom:6px;cursor:pointer;transition:var(--transition);
+}
+.schema-card:hover{border-color:var(--accent);background:var(--accent-light)}
+.schema-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.schema-card-cols{font-size:11px;color:var(--text3);line-height:1.5;word-break:break-all}
+
+/* Config section */
+.config-section{padding:12px 18px;border-top:1px solid var(--border)}
+.config-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.config-row label{font-size:12px;font-weight:500;color:var(--text2);min-width:36px}
+.config-row select,.config-row input{
+  flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);
+  border-radius:var(--radius-xs);padding:6px 10px;font-size:12px;
+  font-family:inherit;transition:var(--transition);outline:none;
+}
+.config-row select:focus,.config-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+
+/* ── Right Panel ──────────────────────────────────────────── */
+.right-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);transition:var(--transition)}
+
+/* Chat messages */
+.chat-messages{
+  flex:1;overflow-y:auto;padding:20px 24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+
+/* Welcome / empty state */
+.welcome{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:40px;text-align:center;
+}
+.welcome-icon{font-size:56px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.welcome h2{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.welcome p{font-size:14px;color:var(--text2);max-width:420px}
+.welcome-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px}
+.chip{
+  font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+  background:var(--glass);color:var(--text);cursor:pointer;transition:var(--transition);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.chip:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent);transform:translateY(-1px)}
+
+/* Message bubbles */
+.msg{display:flex;gap:10px;max-width:88%;animation:msgIn .3s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-avatar{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  margin-top:4px;
+}
+.msg.assistant .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--purple))}
+.msg.user .msg-avatar{background:linear-gradient(135deg,var(--green),var(--accent))}
+.msg-bubble{
+  padding:12px 16px;border-radius:var(--radius-sm);font-size:14px;
+  line-height:1.65;word-break:break-word;
+}
+.msg.assistant .msg-bubble{
+  background:var(--glass);border:1px solid var(--border);
+  border-top-left-radius:4px;
+}
+.msg.user .msg-bubble{
+  background:var(--accent);color:#fff;border-top-right-radius:4px;
+}
+
+/* SQL block */
+.sql-block{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xs);
+  padding:12px;margin:10px 0;font-family:var(--mono);font-size:12.5px;
+  white-space:pre-wrap;overflow-x:auto;color:var(--text);line-height:1.55;
+}
+
+/* Result table */
+.result-table-wrap{margin:10px 0;overflow-x:auto;border-radius:var(--radius-xs);border:1px solid var(--border)}
+.result-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.result-table th{
+  background:var(--surface);color:var(--text2);font-weight:600;
+  padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);
+  font-size:11px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;
+}
+.result-table td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr:hover td{background:var(--accent-light)}
+.row-count{font-size:12px;color:var(--green);margin:6px 0 2px;font-weight:500}
+
+/* Error / info */
+.error-box{
+  background:var(--red-bg);border:1px solid rgba(255,59,48,.2);border-radius:var(--radius-xs);
+  padding:10px 14px;color:var(--red);font-size:13px;margin:8px 0;
+}
+.info-text{font-size:12px;color:var(--text3);margin-top:6px}
+
+/* Typing indicator */
+.typing{display:flex;gap:4px;padding:4px 0}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:typingBounce .65s infinite}
+.typing i:nth-child(2){animation-delay:.12s}
+.typing i:nth-child(3){animation-delay:.24s}
+@keyframes typingBounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
+
+/* ── Input Area ───────────────────────────────────────────── */
+.input-area{
+  padding:14px 20px;border-top:1px solid var(--border);
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+}
+.input-row{display:flex;gap:10px;align-items:flex-end}
+.input-wrap{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:24px;
+  display:flex;align-items:flex-end;padding:4px 4px 4px 16px;transition:var(--transition);
+}
+.input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.input-wrap textarea{
+  flex:1;background:none;border:none;color:var(--text);font-size:14px;
+  font-family:inherit;resize:none;outline:none;max-height:120px;padding:8px 0;
+  line-height:1.5;
+}
+.input-wrap textarea::placeholder{color:var(--text3)}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;border:none;background:var(--accent);
+  color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;
+  justify-content:center;transition:var(--transition);flex-shrink:0;
+}
+.send-btn:hover{background:var(--accent-hover);transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media(max-width:768px){
+  .left-panel{position:absolute;left:0;top:52px;bottom:0;z-index:40;transform:translateX(-100%);box-shadow:4px 0 24px rgba(0,0,0,.12)}
+  .left-panel.open{transform:translateX(0)}
+  .menu-toggle{display:flex}
+  .msg{max-width:92%}
+}
+@media(min-width:769px){
+  .menu-toggle{display:none}
+}
+
+/* ── Sidebar toggle ───────────────────────────────────────── */
+.menu-toggle{
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);cursor:pointer;
+  align-items:center;justify-content:center;font-size:16px;transition:var(--transition);
+  display:none;margin-right:8px;
+}
+.menu-toggle:hover{background:var(--accent-light)}
+
+/* ── Overlay for mobile ───────────────────────────────────── */
+.overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:35}
+.overlay.show{display:flex}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="container">
-    <div class="logo">🤖 <span>AI</span> SQL Agent</div>
-    <div class="badge"><span class="dot"></span> Powered by LongCat-2.0-Preview</div>
+<!-- Banner -->
+<div class="banner">
+  <div class="banner-left">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+    <div class="banner-logo">🤖 <em>AI</em>&nbsp;SQL&nbsp;Agent</div>
+    <div class="banner-badge" id="bannerBadge">LongCat-2.0</div>
+  </div>
+  <div class="banner-right">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题">🌙</button>
   </div>
 </div>
 
-<div class="main">
-<div class="container">
+<!-- App -->
+<div class="app">
 
-  <div class="config-bar">
-    <label>模型:</label>
-    <select id="provider">
-      <option value="longcat" selected>🐱 LongCat</option>
-      <option value="longcat-flash">⚡ LongCat Flash</option>
-      <option value="longcat-thinking">🧠 LongCat Thinking</option>
-      <option value="longcat-omni">🎭 LongCat Omni</option>
-      <option value="longcat-lite">🪶 LongCat Lite</option>
-      <option value="openai">OpenAI GPT</option>
-      <option value="claude">Claude</option>
-      <option value="grok">Grok</option>
-      <option value="glm">智谱 GLM</option>
-      <option value="deepseek">DeepSeek</option>
-      <option value="qwen">通义千问</option>
-      <option value="kimi">Kimi</option>
-      <option value="doubao">豆包</option>
-      <option value="yuanbao">元宝</option>
-    </select>
-    <label>方言:</label>
-    <select id="dialect">
-      <option value="sqlite" selected>SQLite</option>
-      <option value="mysql">MySQL</option>
-      <option value="dm">达梦(DM)</option>
-      <option value="postgres">PostgreSQL</option>
-      <option value="standard">标准 SQL</option>
-    </select>
-    <input type="password" id="apiKey" placeholder="API Key (留空使用 .env 配置)" />
+  <!-- Left Panel: Schema + Config -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <div class="left-panel" id="leftPanel">
+    <div class="panel-header">📊 数据表结构</div>
+    <div class="schema-section" id="schemaSection">
+      <div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">加载中…</div>
+    </div>
+    <div class="config-section">
+      <div class="config-row">
+        <label>模型</label>
+        <select id="provider" onchange="updateBadge()">
+          <option value="longcat">🐱 LongCat</option>
+          <option value="longcat-flash">⚡ LongCat Flash</option>
+          <option value="longcat-thinking">🧠 LongCat Thinking</option>
+          <option value="longcat-omni">🎭 LongCat Omni</option>
+          <option value="longcat-lite">🪶 LongCat Lite</option>
+          <option value="openai">OpenAI GPT</option>
+          <option value="claude">Claude</option>
+          <option value="grok">Grok</option>
+          <option value="glm">智谱 GLM</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="qwen">通义千问</option>
+          <option value="kimi">Kimi</option>
+          <option value="doubao">豆包</option>
+          <option value="yuanbao">元宝</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <label>方言</label>
+        <select id="dialect">
+          <option value="sqlite">SQLite</option>
+          <option value="mysql">MySQL</option>
+          <option value="dm">达梦 DM</option>
+          <option value="postgres">PostgreSQL</option>
+          <option value="standard">标准 SQL</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <label>Key</label>
+        <input type="password" id="apiKey" placeholder="留空使用 .env 配置" />
+      </div>
+    </div>
   </div>
 
-  <div class="schema-panel" id="schemaPanel">
-    <h3>📊 示例数据库 Schema（已内置假数据）</h3>
-    <div id="schemaContent">加载中...</div>
-  </div>
-
-  <div class="chat-area">
+  <!-- Right Panel: Chat -->
+  <div class="right-panel">
     <div class="chat-messages" id="chatMessages">
-      <div class="msg assistant">
-        <div class="avatar">🤖</div>
-        <div class="bubble">
-          你好！我是 AI SQL Agent 👋<br><br>
-          我已经内置了一个示例数据库，包含以下表：<br>
-          • <b>department</b> — 部门表 (id, name, location, budget)<br>
-          • <b>employee</b> — 员工表 (id, name, email, salary, hire_date, department_id, status)<br>
-          • <b>customer</b> — 客户表 (id, name, email, city, register_date)<br>
-          • <b>orders</b> — 订单表 (id, customer_id, total_amount, status, create_time)<br>
-          • <b>product</b> — 产品表 (id, name, category, price, stock)<br><br>
-          试试问我：<br>
-          💡 "查询每个部门的平均工资"<br>
-          💡 "最近30天的订单趋势"<br>
-          💡 "消费金额最高的Top10客户"
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h2>你好，我是 AI SQL Agent</h2>
+        <p>内置示例数据库，包含部门、员工、客户、订单、产品 5 张表。输入自然语言，我来帮你生成 SQL 并执行。</p>
+        <div class="welcome-chips">
+          <div class="chip" onclick="setQuery('查询每个部门的平均工资')">📊 部门平均工资</div>
+          <div class="chip" onclick="setQuery('查询消费金额最高的Top10客户')">🏆 Top10 客户</div>
+          <div class="chip" onclick="setQuery('最近30天的订单数量和金额统计')">📈 订单趋势</div>
+          <div class="chip" onclick="setQuery('查询工资最高的5名员工及其部门')">💰 高薪员工</div>
+          <div class="chip" onclick="setQuery('每个部门的员工数量和总预算')">🏢 部门预算</div>
+          <div class="chip" onclick="setQuery('查询库存不足100的产品')">📦 库存不足</div>
         </div>
       </div>
     </div>
-    <div class="examples">
-      <button onclick="setQuery('查询每个部门的平均工资')">部门平均工资</button>
-      <button onclick="setQuery('查询消费金额最高的Top10客户')">Top10客户</button>
-      <button onclick="setQuery('最近30天的订单数量和金额统计')">订单趋势</button>
-      <button onclick="setQuery('查询工资最高的5名员工及其部门')">高薪员工</button>
-      <button onclick="setQuery('每个部门的员工数量和总预算')">部门预算</button>
-      <button onclick="setQuery('查询库存不足100的产品')">库存不足</button>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="queryInput" placeholder="输入自然语言查询，如：查询每个部门的平均工资" onkeydown="if(event.key==='Enter')sendQuery()" />
-      <button onclick="sendQuery()" id="sendBtn">发送</button>
+    <div class="input-area">
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="queryInput" placeholder="输入自然语言查询…" rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendQuery()" title="发送 (Enter)">➤</button>
+        </div>
+      </div>
     </div>
   </div>
 
 </div>
-</div>
 
 <script>
-const messages = document.getElementById('chatMessages');
-const input = document.getElementById('queryInput');
-const sendBtn = document.getElementById('sendBtn');
+// ── Theme ─────────────────────────────────────────────────────
+const savedTheme = localStorage.getItem('aistheme');
+if (savedTheme === 'dark') document.body.classList.add('dark');
+updateThemeIcon();
 
-// Load schema
-fetch('/api/schema').then(r=>r.json()).then(d=>{
-  const c = document.getElementById('schemaContent');
-  if(d.tables && d.tables.length){
-    c.innerHTML = d.tables.map(t =>
-      `<div class="schema-table"><div class="tname">${t.name}</div><div class="tcols">${t.columns}</div></div>`
-    ).join('');
-  } else {
-    c.innerHTML = '<span style="color:var(--text3)">无表</span>';
-  }
-}).catch(()=>{});
-
-function setQuery(q){ input.value=q; input.focus(); }
-
-function addMsg(role, html){
-  const div = document.createElement('div');
-  div.className = 'msg ' + role;
-  div.innerHTML = `<div class="avatar">${role==='assistant'?'🤖':'👤'}</div><div class="bubble">${html}</div>`;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('aistheme', document.body.classList.contains('dark') ? 'dark' : 'light');
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
 }
 
-function addLoading(){
+// ── Sidebar (mobile) ─────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('leftPanel').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+// ── Badge ────────────────────────────────────────────────────
+const providerLabels = {
+  longcat:'LongCat-2.0', 'longcat-flash':'Flash', 'longcat-thinking':'Thinking',
+  'longcat-omni':'Omni', 'longcat-lite':'Lite', openai:'GPT', claude:'Claude',
+  grok:'Grok', glm:'GLM', deepseek:'DeepSeek', qwen:'Qwen', kimi:'Kimi',
+  doubao:'Doubao', yuanbao:'Yuanbao'
+};
+function updateBadge() {
+  const p = document.getElementById('provider').value;
+  document.getElementById('bannerBadge').textContent = providerLabels[p] || p;
+}
+
+// ── Schema ───────────────────────────────────────────────────
+fetch('/api/schema')
+  .then(r => r.json())
+  .then(d => {
+    const el = document.getElementById('schemaSection');
+    if (!d.tables || !d.tables.length) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">无数据表</div>';
+      return;
+    }
+    el.innerHTML = `<div class="schema-group">
+      <div class="schema-group-title">示例数据库 · ${d.tables.length} 张表</div>
+      ${d.tables.map(t => `
+        <div class="schema-card" onclick="setQuery('查询 ${t.name} 表的所有数据')">
+          <div class="schema-card-name">${t.name}</div>
+          <div class="schema-card-cols">${t.columns}</div>
+        </div>`).join('')}
+    </div>`;
+  }).catch(() => {});
+
+// ── Chat ─────────────────────────────────────────────────────
+const messagesEl = document.getElementById('chatMessages');
+const inputEl = document.getElementById('queryInput');
+const sendBtn = document.getElementById('sendBtn');
+let welcomeHidden = false;
+
+function setQuery(q) {
+  inputEl.value = q;
+  inputEl.focus();
+  autoResize(inputEl);
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+}
+
+function hideWelcome() {
+  if (welcomeHidden) return;
+  welcomeHidden = true;
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+function addMsg(role, html) {
+  hideWelcome();
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const avatar = role === 'assistant' ? '🤖' : '👤';
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${html}</div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+function addLoading() {
+  hideWelcome();
   const div = document.createElement('div');
   div.className = 'msg assistant';
   div.id = 'loadingMsg';
-  div.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="loading"><span></span><span></span><span></span></div></div>`;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing"><i></i><i></i><i></i></div></div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function removeLoading(){
+function removeLoading() {
   const el = document.getElementById('loadingMsg');
-  if(el) el.remove();
+  if (el) el.remove();
 }
 
-function fmtTable(rows, cols){
-  if(!rows || !rows.length) return '<div class="info">查询返回 0 行</div>';
-  let html = '<table class="result-table"><thead><tr>';
+function renderTable(rows, cols) {
+  if (!rows || !rows.length) return '<div class="info-text">查询返回 0 行</div>';
+  let html = '<div class="result-table-wrap"><table class="result-table"><thead><tr>';
   cols.forEach(c => html += `<th>${c}</th>`);
   html += '</tr></thead><tbody>';
   rows.forEach(r => {
     html += '<tr>';
-    cols.forEach(c => html += `<td>${r[c]!==undefined?r[c]:''}</td>`);
+    cols.forEach(c => html += `<td>${r[c] != null ? r[c] : ''}</td>`);
     html += '</tr>';
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   return html;
 }
 
-async function sendQuery(){
-  const q = input.value.trim();
-  if(!q) return;
+async function sendQuery() {
+  const q = inputEl.value.trim();
+  if (!q) return;
+
   const provider = document.getElementById('provider').value;
   const dialect = document.getElementById('dialect').value;
   const apiKey = document.getElementById('apiKey').value.trim();
 
   addMsg('user', q);
-  input.value = '';
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
   addLoading();
   sendBtn.disabled = true;
 
-  try{
+  try {
     const resp = await fetch('/api/ask', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -380,29 +616,39 @@ async function sendQuery(){
     removeLoading();
 
     let html = '';
-    if(data.understanding){
-      html += `<div style="color:var(--text3);font-size:12px;margin-bottom:6px">💭 ${data.understanding}</div>`;
+    if (data.understanding && data.understanding !== q) {
+      html += `<div style="color:var(--text3);font-size:12px;margin-bottom:8px">💭 ${data.understanding}</div>`;
     }
-    if(data.sql){
-      html += `<div class="sql-block">${data.sql}</div>`;
+    if (data.sql) {
+      html += `<div class="sql-block">${escapeHtml(data.sql)}</div>`;
     }
-    if(data.rows && data.columns){
-      html += `<div style="font-size:12px;color:var(--green);margin:4px 0">📊 ${data.row_count} 行结果</div>`;
-      html += fmtTable(data.rows, data.columns);
+    if (data.rows && data.columns) {
+      html += `<div class="row-count">📊 ${data.row_count} 行结果</div>`;
+      html += renderTable(data.rows, data.columns);
     }
-    if(data.analysis){
-      html += `<div style="margin-top:8px">${data.analysis}</div>`;
+    if (data.analysis) {
+      html += `<div style="margin-top:10px">${data.analysis}</div>`;
     }
-    if(data.error){
-      html += `<div class="error">❌ ${data.error}</div>`;
+    if (data.explanation) {
+      html += `<div class="info-text" style="margin-top:8px">💡 ${data.explanation}</div>`;
     }
-    if(!html) html = data.answer || data.summary || '无返回结果';
+    if (data.error) {
+      html += `<div class="error-box">❌ ${data.error}</div>`;
+    }
+    if (!html) html = data.answer || data.summary || '无返回结果';
     addMsg('assistant', html);
-  }catch(e){
+  } catch (e) {
     removeLoading();
-    addMsg('assistant', `<div class="error">❌ 请求失败: ${e.message}</div>`);
+    addMsg('assistant', `<div class="error-box">❌ 请求失败: ${e.message}</div>`);
   }
   sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
 }
 </script>
 </body>
@@ -443,11 +689,8 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _get_schema(self):
         try:
-            db_config = DBConfig(db_type="sqlite", name=":memory:")
-            # Use file-based temp DB so schema is visible
-            import tempfile, os
             tmp = tempfile.mktemp(suffix='.db')
-            db_config.name = tmp
+            db_config = DBConfig(db_type="sqlite", name=tmp)
             init_sample_db(db_config)
             conn = sqlite3.connect(tmp)
             cursor = conn.cursor()
@@ -480,13 +723,10 @@ class Handler(SimpleHTTPRequestHandler):
             }
             dialect = dialect_map.get(dialect_str, DialectType.SQLITE)
 
-            # Build provider config
             p = build_provider(provider)
             if api_key:
                 p.api_key = api_key
 
-            # Create temp DB with sample data
-            import tempfile, os
             tmp = tempfile.mktemp(suffix='.db')
             db_config = DBConfig(db_type="sqlite", name=tmp)
             init_sample_db(db_config)
@@ -506,7 +746,6 @@ class Handler(SimpleHTTPRequestHandler):
                     "explanation": result.get("explanation", ""),
                 }
 
-                # Try to execute
                 sql = result.get("sql", "")
                 if sql:
                     try:
