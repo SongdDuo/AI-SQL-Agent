@@ -340,6 +340,18 @@ src/ai_sql_agent/
 
 ## 📊 实际效果
 
+### 🌐 Web UI 界面
+
+AI SQL Agent 提供了基于浏览器的 Web UI，内置示例数据库，支持自然语言查询、SQL 生成、结果展示和 AI 分析，无需配置即可体验完整流程。
+
+<p align="center">
+  <img src="docs/screenshots/web-ui-demo.png" alt="Web UI 演示" width="900" />
+</p>
+
+> 启动命令：`ai-sql web --port 8080`，然后打开浏览器访问 `http://127.0.0.1:8080`
+
+### 📈 效果数据
+
 - ⚡ **数据查询效率提升约 60%~80%**
 - 👥 **非技术用户可直接完成基础分析任务**
 - ✅ **在测试场景中，大部分常见分析问题可自动生成正确 SQL**

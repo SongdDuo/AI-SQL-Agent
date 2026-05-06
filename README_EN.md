@@ -307,6 +307,16 @@ ai-sql -p claude-proxy ask "Analyze order data"
 | SQLite | `sqlite` | SQLite syntax (recommended for testing) |
 | Standard SQL | `standard` | Default |
 
+## 🌐 Web UI
+
+AI SQL Agent provides a browser-based Web UI with a built-in sample database. Experience the full workflow — natural language query, SQL generation, result display, and AI analysis — without any configuration.
+
+<p align="center">
+  <img src="docs/screenshots/web-ui-demo.png" alt="Web UI Demo" width="900" />
+</p>
+
+> Launch: `ai-sql web --port 8080`, then open `http://127.0.0.1:8080` in your browser.
+
 ## 📁 Project Structure
 
 ```
