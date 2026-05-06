@@ -65,7 +65,7 @@ PROVIDER_PRESETS = {
     # LongCat 系列（默认推荐）
     "longcat": {
         "base_url": "https://api.longcat.chat/openai",
-        "model": "longcat-2.0-preview",
+        "model": "LongCat-2.0-Preview",
     },
     "longcat-flash": {
         "base_url": "https://api.longcat.chat/openai",

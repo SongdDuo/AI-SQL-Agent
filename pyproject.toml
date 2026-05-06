@@ -43,6 +43,7 @@ dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "ruff>=0.1.0"]
 
 [project.scripts]
 ai-sql = "ai_sql_agent.cli:main"
+ai-sql-web = "ai_sql_agent.web:start_web"
 
 [tool.setuptools.packages.find]
 where = ["src"]

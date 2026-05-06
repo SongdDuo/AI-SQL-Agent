@@ -1,6 +1,8 @@
 """Model providers — OpenAI-compatible and Claude."""
 
+import io
 import logging
+import sys
 from typing import List
 
 from .base import BaseModel, Message
@@ -32,7 +34,10 @@ class OpenAICompatibleModel(BaseModel):
             max_tokens=kwargs.get("max_tokens", self.max_tokens),
             temperature=kwargs.get("temperature", self.temperature),
         )
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+        if isinstance(content, bytes):
+            content = content.decode("utf-8", errors="replace")
+        return content
 
 
 class ClaudeModel(BaseModel):

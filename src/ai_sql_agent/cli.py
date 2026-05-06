@@ -3,6 +3,11 @@
 import json
 import sys
 
+# Fix Windows encoding
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 import click
 from rich.console import Console
 from rich.markdown import Markdown
@@ -251,6 +256,15 @@ def interactive(ctx):
             history = history[-20:]
 
     assistant.close()
+
+
+@cli.command()
+@click.option("--host", default="127.0.0.1", help="监听地址")
+@click.option("--port", "-p", default=8080, help="监听端口")
+def web(host, port):
+    """启动 Web UI 界面（内置示例数据库）"""
+    from .web import start_web
+    start_web(host=host, port=port)
 
 
 def main():
