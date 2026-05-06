@@ -67,18 +67,26 @@ Respond with JSON:
 """
 
 ANALYZE_RESULT_PROMPT = """\
-Analyze the following SQL query result and provide insights.
+请用中文简要分析以下 SQL 查询结果，控制在 200 字以内，分 3 个要点：
 
-Original query: {query}
-Dialect: {dialect}
+原始查询：{query}
+结果行数：{row_count}
 
-Result ({row_count} rows):
+数据预览：
 {result_preview}
 
-Provide:
-1. Key findings summary
-2. Data patterns or anomalies
-3. Recommendations based on the data
+请按以下格式输出（用中文，简洁）：
+**关键发现**
+- 要点1
+- 要点2
+
+**数据规律**
+- 要点1
+- 要点2
+
+**建议**
+- 要点1
+- 要点2
 """
 
 AGENT_TASK_DECOMPOSE_PROMPT = """\

@@ -379,7 +379,28 @@ body.dark{
 /* ── Overlay for mobile ───────────────────────────────────── */
 .overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:35}
 .overlay.show{display:flex}
+
+/* ── Markdown rendered content ────────────────────────────── */
+.md-content{font-size:13.5px;line-height:1.7;color:var(--text)}
+.md-content h1,.md-content h2,.md-content h3,.md-content h4{margin:10px 0 6px;font-weight:600;color:var(--text)}
+.md-content h2{font-size:15px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.md-content h3{font-size:14px}
+.md-content p{margin:4px 0}
+.md-content ul,.md-content ol{padding-left:20px;margin:4px 0}
+.md-content li{margin:2px 0}
+.md-content strong{color:var(--text);font-weight:600}
+.md-content em{color:var(--text2)}
+.md-content code{background:var(--bg);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.md-content pre{background:var(--bg);padding:10px;border-radius:var(--radius-xs);overflow-x:auto;margin:6px 0}
+.md-content pre code{background:none;padding:0}
+.md-content blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--text2);margin:6px 0}
+.md-content table{border-collapse:collapse;margin:8px 0;font-size:12.5px}
+.md-content th,.md-content td{border:1px solid var(--border);padding:4px 10px;text-align:left}
+.md-content th{background:var(--surface);font-weight:600}
+.md-content hr{border:none;border-top:1px solid var(--border);margin:10px 0}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>if(typeof marked==='undefined'){window.marked={parse:function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}}}</script>
 </head>
 <body>
 
@@ -600,7 +621,7 @@ async function sendQuery() {
   const dialect = document.getElementById('dialect').value;
   const apiKey = document.getElementById('apiKey').value.trim();
 
-  addMsg('user', q);
+  addMsg('user', escapeHtml(q));
   inputEl.value = '';
   inputEl.style.height = 'auto';
   addLoading();
@@ -627,10 +648,11 @@ async function sendQuery() {
       html += renderTable(data.rows, data.columns);
     }
     if (data.analysis) {
-      html += `<div style="margin-top:10px">${data.analysis}</div>`;
+      const mdHtml = (typeof marked !== 'undefined') ? marked.parse(data.analysis) : escapeHtml(data.analysis);
+      html += `<div class="md-content" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">${mdHtml}</div>`;
     }
-    if (data.explanation) {
-      html += `<div class="info-text" style="margin-top:8px">💡 ${data.explanation}</div>`;
+    if (data.explanation && !data.analysis) {
+      html += `<div class="info-text" style="margin-top:8px">💡 ${escapeHtml(data.explanation)}</div>`;
     }
     if (data.error) {
       html += `<div class="error-box">❌ ${data.error}</div>`;
