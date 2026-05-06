@@ -413,26 +413,26 @@ body.dark{
           <option value="longcat-flash">⚡ LongCat Flash</option>
           <option value="longcat-thinking">🧠 LongCat Thinking</option>
           <option value="longcat-omni">🎭 LongCat Omni</option>
-          <option value="longcat-lite">🪶 LongCat Lite</option>
-          <option value="openai">OpenAI GPT</option>
-          <option value="claude">Claude</option>
-          <option value="grok">Grok</option>
-          <option value="glm">智谱 GLM</option>
-          <option value="deepseek">DeepSeek</option>
-          <option value="qwen">通义千问</option>
-          <option value="kimi">Kimi</option>
-          <option value="doubao">豆包</option>
-          <option value="yuanbao">元宝</option>
+          <option value="longcat-lite">🍃 LongCat Lite</option>
+          <option value="openai">🧪 OpenAI GPT</option>
+          <option value="claude">🔮 Claude</option>
+          <option value="grok">🚀 Grok</option>
+          <option value="glm">🦅 智谱 GLM</option>
+          <option value="deepseek">🐋 DeepSeek</option>
+          <option value="qwen">☁️ 通义千问</option>
+          <option value="kimi">🌙 Kimi</option>
+          <option value="doubao">🫘 豆包</option>
+          <option value="yuanbao">💎 元宝</option>
         </select>
       </div>
       <div class="config-row">
         <label>方言</label>
         <select id="dialect">
-          <option value="sqlite">SQLite</option>
-          <option value="mysql">MySQL</option>
-          <option value="dm">达梦 DM</option>
-          <option value="postgres">PostgreSQL</option>
-          <option value="standard">标准 SQL</option>
+          <option value="sqlite">🪶 SQLite</option>
+          <option value="mysql">🐬 MySQL</option>
+          <option value="dm">🐉 达梦 DM</option>
+          <option value="postgres">🐘 PostgreSQL</option>
+          <option value="standard">📐 标准 SQL</option>
         </select>
       </div>
       <div class="config-row">
