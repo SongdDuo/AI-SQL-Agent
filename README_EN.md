@@ -246,6 +246,8 @@ print(f"Summary:\n{result['summary']}")
 
 ### Environment Variables
 
+Config file loading priority: `.env.local` (local secrets, git-ignored) > `.env` (general config)
+
 All models use `AI_{PROVIDER}_API_KEY` for authentication:
 
 ```bash
@@ -274,6 +276,25 @@ AI_OPENAI_PROXY_MODEL=gpt-4o
 AI_CLAUDE_PROXY_API_KEY=your_api_key
 AI_CLAUDE_PROXY_BASE_URL=https://your-proxy-url
 AI_CLAUDE_PROXY_MODEL=claude-sonnet-4-20250514
+```
+
+### CLI Examples
+
+```bash
+# Use Kimi model
+ai-sql -p kimi ask "Show average salary by department"
+
+# Use Doubao model
+ai-sql -p doubao ask "Order trends for the last 30 days"
+
+# Use Grok model
+ai-sql -p grok ask "Analyze sales data"
+
+# Use OpenAI relay proxy
+ai-sql -p openai-proxy ask "List all users"
+
+# Use Claude relay proxy
+ai-sql -p claude-proxy ask "Analyze order data"
 ```
 
 ## 🗄️ Supported Dialects

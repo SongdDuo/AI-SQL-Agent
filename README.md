@@ -257,6 +257,8 @@ print(f"摘要:\n{result['summary']}")
 
 ### 环境变量配置
 
+配置文件加载优先级：`.env.local`（本地密钥，git 忽略）> `.env`（通用配置）
+
 所有模型均通过 `AI_{PROVIDER}_API_KEY` 配置密钥，例如：
 
 ```bash
@@ -284,6 +286,25 @@ AI_OPENAI_PROXY_MODEL=gpt-4o
 AI_CLAUDE_PROXY_API_KEY=your_api_key
 AI_CLAUDE_PROXY_BASE_URL=https://your-proxy-url
 AI_CLAUDE_PROXY_MODEL=claude-sonnet-4-20250514
+```
+
+### CLI 使用示例
+
+```bash
+# 使用 Kimi 模型
+ai-sql -p kimi ask "查询每个部门的平均工资"
+
+# 使用豆包模型
+ai-sql -p doubao ask "最近30天订单趋势"
+
+# 使用 Grok 模型
+ai-sql -p grok ask "分析销售数据"
+
+# 使用 OpenAI 中转站
+ai-sql -p openai-proxy ask "查询用户列表"
+
+# 使用 Claude 中转站
+ai-sql -p claude-proxy ask "分析订单数据"
 ```
 
 ## 🗄️ 支持的数据库方言
