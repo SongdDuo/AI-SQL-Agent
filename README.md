@@ -82,6 +82,15 @@
 - 💬 **多轮对话** — 支持连续提问，维护上下文理解
 - 🛠️ **CLI & SDK** — 命令行工具 + Python SDK，灵活集成
 
+## 🔗 项目链接
+
+| 类型 | 地址 |
+|------|------|
+| 🌟 GitHub 仓库 | https://github.com/SongdDuo/AI-SQL-Agent |
+| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
+| 📦 PyPI 包 | https://pypi.org/project/ai-sql-agent/ |
+| 📄 在线文档 | https://github.com/SongdDuo/AI-SQL-Agent#readme |
+
 ## 🚀 快速开始
 
 ### 安装
@@ -273,15 +282,6 @@ src/ai_sql_agent/
 - ✅ **在测试场景中，大部分常见分析问题可自动生成正确 SQL**
 - 🔧 **SQL 执行失败自动修复，减少人工干预**
 - 💬 **多轮对话支持，连续提问无需重复上下文**
-
-## 🔗 项目链接
-
-| 类型 | 地址 |
-|------|------|
-| 🌟 GitHub 仓库 | https://github.com/SongdDuo/AI-SQL-Agent |
-| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
-| 📦 PyPI 包 | https://pypi.org/project/ai-sql-agent/ |
-| 📄 在线文档 | https://github.com/SongdDuo/AI-SQL-Agent#readme |
 
 ## 🤝 贡献指南
 

@@ -81,6 +81,15 @@ The system adopts an **Agent + Tool Calling** design:
 - 💬 **Multi-Turn Chat** — Supports follow-up questions with context preservation
 - 🛠️ **CLI & SDK** — Command-line tool + Python SDK for flexible integration
 
+## 🔗 Project Links
+
+| Type | URL |
+|------|-----|
+| 🌟 GitHub Repository | https://github.com/SongdDuo/AI-SQL-Agent |
+| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
+| 📦 PyPI Package | https://pypi.org/project/ai-sql-agent/ |
+| 📄 Documentation | https://github.com/SongdDuo/AI-SQL-Agent#readme |
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -260,15 +269,6 @@ src/ai_sql_agent/
 - ✅ **Most common analysis problems** can auto-generate correct SQL in test scenarios
 - 🔧 **Auto SQL fix** reduces manual intervention
 - 💬 **Multi-turn conversation** eliminates repetitive context
-
-## 🔗 Project Links
-
-| Type | URL |
-|------|-----|
-| 🌟 GitHub Repository | https://github.com/SongdDuo/AI-SQL-Agent |
-| 🔄 GitHub Actions | https://github.com/SongdDuo/AI-SQL-Agent/actions |
-| 📦 PyPI Package | https://pypi.org/project/ai-sql-agent/ |
-| 📄 Documentation | https://github.com/SongdDuo/AI-SQL-Agent#readme |
 
 ## 🤝 Contributing
 
