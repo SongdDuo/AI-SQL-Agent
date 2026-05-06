@@ -434,22 +434,22 @@ body.light{
     <div class="config-section">
       <div class="config-row">
         <label>模型</label>
-        <input id="provider" list="providerList" placeholder="输入或选择模型" value="longcat" onchange="updateBadge()" />
+        <input id="provider" list="providerList" placeholder="输入或选择模型" value="🐱 LongCat" onchange="updateBadge()" />
         <datalist id="providerList">
-          <option value="longcat">🐱 LongCat</option>
-          <option value="longcat-flash">⚡ LongCat Flash</option>
-          <option value="longcat-thinking">🧠 LongCat Thinking</option>
-          <option value="longcat-omni">🎭 LongCat Omni</option>
-          <option value="longcat-lite">🍃 LongCat Lite</option>
-          <option value="openai">🧪 OpenAI GPT-5.5</option>
-          <option value="claude">🔮 Claude Sonnet 4.6</option>
-          <option value="grok">🚀 Grok</option>
-          <option value="glm">🦅 智谱 GLM-5.1</option>
-          <option value="deepseek">🐋 DeepSeek-V4</option>
-          <option value="qwen">☁️ 通义千问 Qwen3.6</option>
-          <option value="kimi">🌙 Kimi-K2.6</option>
-          <option value="doubao">🫘 豆包 Doubao-Seed-1.6</option>
-          <option value="yuanbao">💎 元宝 hunyuan-turbo</option>
+          <option value="🐱 LongCat" label="longcat" />
+          <option value="⚡ LongCat Flash" label="longcat-flash" />
+          <option value="🧠 LongCat Thinking" label="longcat-thinking" />
+          <option value="🎭 LongCat Omni" label="longcat-omni" />
+          <option value="🍃 LongCat Lite" label="longcat-lite" />
+          <option value="🧪 OpenAI GPT-5.5" label="openai" />
+          <option value="🔮 Claude Sonnet 4.6" label="claude" />
+          <option value="🚀 Grok" label="grok" />
+          <option value="🦅 智谱 GLM-5.1" label="glm" />
+          <option value="🐋 DeepSeek-V4" label="deepseek" />
+          <option value="☁️ 通义千问 Qwen3.6" label="qwen" />
+          <option value="🌙 Kimi-K2.6" label="kimi" />
+          <option value="🫘 豆包 Doubao-Seed-1.6" label="doubao" />
+          <option value="💎 元宝 hunyuan-turbo" label="yuanbao" />
         </datalist>
       </div>
       <div class="config-row">
@@ -527,8 +527,14 @@ const providerLabels = {
   grok:'Grok', glm:'GLM', deepseek:'DeepSeek', qwen:'Qwen', kimi:'Kimi',
   doubao:'Doubao', yuanbao:'Yuanbao'
 };
+function getProviderValue() {
+  const input = document.getElementById('provider');
+  const val = input.value;
+  const opt = document.querySelector('#providerList option[value="' + val.replace(/"/g, '&quot;') + '"]');
+  return opt ? opt.label : val;
+}
 function updateBadge() {
-  const p = document.getElementById('provider').value;
+  const p = getProviderValue();
   document.getElementById('bannerBadge').textContent = providerLabels[p] || p;
 }
 
@@ -623,7 +629,7 @@ async function sendQuery() {
   const q = inputEl.value.trim();
   if (!q) return;
 
-  const provider = document.getElementById('provider').value;
+  const provider = getProviderValue();
   const dialect = document.getElementById('dialect').value;
   const apiKey = document.getElementById('apiKey').value.trim();
 
