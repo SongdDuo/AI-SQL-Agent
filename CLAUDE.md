@@ -126,8 +126,11 @@ ruff format .
 | LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603 |
 | LongCat Lite | `longcat-lite` | LongCat-Flash-Lite |
 
-### All Model Providers
-`longcat`, `longcat-flash`, `longcat-thinking`, `longcat-omni`, `longcat-lite`, `openai`, `glm`, `mimo`, `claude`, `deepseek`, `qwen`
+### All Model Providers (16)
+**LongCat 系列**: `longcat`, `longcat-flash`, `longcat-thinking`, `longcat-omni`, `longcat-lite`
+**国际**: `openai`, `claude`, `grok`
+**国产**: `glm`, `mimo`, `deepseek`, `qwen`, `kimi`, `doubao`, `yuanbao`
+**中转站**: `openai-proxy`, `claude-proxy`
 
 ### Database Dialects
 - `dm`: 达梦数据库 (SYSDATE, TO_CHAR, NVL)

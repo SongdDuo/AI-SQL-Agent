@@ -1,6 +1,7 @@
 """Configuration management for multi-model AI SQL Agent."""
 
 import os
+import re
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -23,7 +24,7 @@ class ModelProvider:
 @dataclass
 class AgentConfig:
     """Agent workflow configuration."""
-    default_provider: str = field(default_factory=lambda: os.getenv("AI_DEFAULT_PROVIDER", "openai"))
+    default_provider: str = field(default_factory=lambda: os.getenv("AI_DEFAULT_PROVIDER", "longcat"))
     max_retries: int = 3
     max_sub_tasks: int = 5
     execution_timeout: int = 30
@@ -44,33 +45,17 @@ class DBConfig:
         return bool(self.db_type and self.name)
 
 
+def _env_key(name: str, suffix: str) -> str:
+    """Convert provider name to env var prefix.
+    e.g. 'longcat-flash' -> 'AI_LONGCAT_FLASH_'
+    """
+    return f"AI_{name.upper().replace('-', '_').replace('.', '_')}{suffix}"
+
+
 # --- Provider presets ---
 
 PROVIDER_PRESETS = {
-    "openai": {
-        "base_url": "https://api.openai.com/v1",
-        "model": "gpt-4o",
-    },
-    "glm": {
-        "base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "model": "glm-4-plus",
-    },
-    "mimo": {
-        "base_url": "https://api.xiaomimimo.com/v1",
-        "model": "mimo-v2.5",
-    },
-    "claude": {
-        "base_url": "https://api.anthropic.com",
-        "model": "claude-sonnet-4-20250514",
-    },
-    "deepseek": {
-        "base_url": "https://api.deepseek.com/v1",
-        "model": "deepseek-chat",
-    },
-    "qwen": {
-        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "model": "qwen-plus",
-    },
+    # LongCat 系列（默认推荐）
     "longcat": {
         "base_url": "https://api.longcat.chat/openai",
         "model": "longcat-2.0-preview",
@@ -91,15 +76,75 @@ PROVIDER_PRESETS = {
         "base_url": "https://api.longcat.chat/openai",
         "model": "LongCat-Flash-Lite",
     },
+    # OpenAI
+    "openai": {
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o",
+    },
+    # 智谱 GLM
+    "glm": {
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "model": "glm-4-plus",
+    },
+    # 小米 MiMo
+    "mimo": {
+        "base_url": "https://api.xiaomimimo.com/v1",
+        "model": "mimo-v2.5",
+    },
+    # Anthropic Claude
+    "claude": {
+        "base_url": "https://api.anthropic.com",
+        "model": "claude-sonnet-4-20250514",
+    },
+    # DeepSeek
+    "deepseek": {
+        "base_url": "https://api.deepseek.com/v1",
+        "model": "deepseek-chat",
+    },
+    # 阿里通义千问
+    "qwen": {
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "model": "qwen-plus",
+    },
+    # 月之暗面 Kimi
+    "kimi": {
+        "base_url": "https://api.moonshot.cn/v1",
+        "model": "kimi-k2.6",
+    },
+    # 字节跳动 豆包（火山方舟）
+    "doubao": {
+        "base_url": "https://ark.cn-beijing.volces.com/api/v3",
+        "model": "doubao-pro-32k",
+    },
+    # 腾讯混元 元宝
+    "yuanbao": {
+        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+        "model": "hunyuan-turbo",
+    },
+    # xAI Grok
+    "grok": {
+        "base_url": "https://api.x.ai/v1",
+        "model": "grok-4-1-fast",
+    },
+    # 通用 OpenAI 兼容中转站（如 One-API、New-API 等）
+    "openai-proxy": {
+        "base_url": "",
+        "model": "",
+    },
+    # 通用 Anthropic 兼容中转站
+    "claude-proxy": {
+        "base_url": "",
+        "model": "",
+    },
 }
 
 
 def build_provider(name: str, api_key: Optional[str] = None) -> ModelProvider:
     """Build a ModelProvider from preset + env vars."""
     preset = PROVIDER_PRESETS.get(name, {})
-    env_key = f"AI_{name.upper()}_API_KEY"
-    env_url = f"AI_{name.upper()}_BASE_URL"
-    env_model = f"AI_{name.upper()}_MODEL"
+    env_key = _env_key(name, "_API_KEY")
+    env_url = _env_key(name, "_BASE_URL")
+    env_model = _env_key(name, "_MODEL")
     return ModelProvider(
         name=name,
         api_key=api_key or os.getenv(env_key, ""),

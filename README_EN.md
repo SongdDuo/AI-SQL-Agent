@@ -207,28 +207,73 @@ print(f"Summary:\n{result['summary']}")
 
 | Provider | `provider` param | Notes |
 |----------|-----------------|-------|
-| 🐱 LongCat | `longcat` | LongCat-2.0-Preview (recommended) |
-| ⚡ LongCat Flash | `longcat-flash` | LongCat-Flash-Chat (fast) |
-| 🧠 LongCat Thinking | `longcat-thinking` | LongCat-Flash-Thinking-2601 (strong reasoning) |
-| 🎭 LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603 (multimodal) |
-| 🪶 LongCat Lite | `longcat-lite` | LongCat-Flash-Lite (lightweight) |
-| OpenAI GPT | `openai` | GPT-4o etc. |
-| Zhipu GLM | `glm` | GLM-4-Plus |
-| Xiaomi MiMo | `mimo` | MiMo V2.5 |
-| Anthropic Claude | `claude` | Claude Sonnet |
-| DeepSeek | `deepseek` | DeepSeek Chat |
-| Alibaba Qwen | `qwen` | Qwen-Plus |
+### 🐱 LongCat Series (Default)
 
-### LongCat Configuration
+| Provider | `param` | Default Model | Notes |
+|----------|---------|---------------|-------|
+| LongCat | `longcat` | longcat-2.0-preview | Best overall |
+| LongCat Flash | `longcat-flash` | LongCat-Flash-Chat | Fast response |
+| LongCat Thinking | `longcat-thinking` | LongCat-Flash-Thinking-2601 | Strong reasoning |
+| LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603 | Multimodal |
+| LongCat Lite | `longcat-lite` | LongCat-Flash-Lite | Lightweight |
+
+### 🌍 International
+
+| Provider | `param` | Default Model | Protocol |
+|----------|---------|---------------|----------|
+| OpenAI | `openai` | gpt-4o | OpenAI |
+| Anthropic Claude | `claude` | claude-sonnet-4-20250514 | Anthropic |
+| xAI Grok | `grok` | grok-4-1-fast | OpenAI-compatible |
+
+### 🇨🇳 Domestic
+
+| Provider | `param` | Default Model | Protocol |
+|----------|---------|---------------|----------|
+| Zhipu GLM | `glm` | glm-4-plus | OpenAI-compatible |
+| Xiaomi MiMo | `mimo` | mimo-v2.5 | OpenAI-compatible |
+| DeepSeek | `deepseek` | deepseek-chat | OpenAI-compatible |
+| Alibaba Qwen | `qwen` | qwen-plus | OpenAI-compatible |
+| Moonshot Kimi | `kimi` | kimi-k2.6 | OpenAI-compatible |
+| ByteDance Doubao | `doubao` | doubao-pro-32k | OpenAI-compatible |
+| Tencent Yuanbao | `yuanbao` | hunyuan-turbo | OpenAI-compatible |
+
+### 🔄 Relay Proxies
+
+| Provider | `param` | Protocol | Notes |
+|----------|---------|----------|-------|
+| OpenAI Proxy | `openai-proxy` | OpenAI-compatible | One-API / New-API etc. |
+| Claude Proxy | `claude-proxy` | Anthropic | Claude protocol relay |
+
+### Environment Variables
+
+All models use `AI_{PROVIDER}_API_KEY` for authentication:
 
 ```bash
-# .env
+# LongCat (recommended)
 AI_DEFAULT_PROVIDER=longcat
-AI_LONGCAT_API_KEY=your_api_key_here
+AI_LONGCAT_API_KEY=your_api_key
 
-# Optional: custom base URL and model
-AI_LONGCAT_BASE_URL=https://api.longcat.chat/openai
-AI_LONGCAT_MODEL=longcat-2.0-preview
+# Kimi
+AI_KIMI_API_KEY=your_api_key
+
+# Doubao
+AI_DOUBAO_API_KEY=your_api_key
+
+# Yuanbao
+AI_YUANBAO_API_KEY=your_api_key
+
+# Grok
+AI_GROK_API_KEY=your_api_key
+
+# OpenAI-compatible relay proxy
+AI_OPENAI_PROXY_API_KEY=your_api_key
+AI_OPENAI_PROXY_BASE_URL=https://your-proxy-url/v1
+AI_OPENAI_PROXY_MODEL=gpt-4o
+
+# Anthropic-compatible relay proxy
+AI_CLAUDE_PROXY_API_KEY=your_api_key
+AI_CLAUDE_PROXY_BASE_URL=https://your-proxy-url
+AI_CLAUDE_PROXY_MODEL=claude-sonnet-4-20250514
 ```
 
 ## 🗄️ Supported Dialects

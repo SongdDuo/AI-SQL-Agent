@@ -20,8 +20,15 @@ console = Console()
 
 DIALECT_CHOICES = click.Choice(["dm", "mysql", "postgres", "sqlite", "standard"])
 PROVIDER_CHOICES = click.Choice([
-    "openai", "glm", "mimo", "claude", "deepseek", "qwen",
+    # LongCat 系列（默认推荐）
     "longcat", "longcat-flash", "longcat-thinking", "longcat-omni", "longcat-lite",
+    # 国际主流
+    "openai", "claude", "grok",
+    # 国产主流
+    "glm", "mimo", "deepseek", "qwen",
+    "kimi", "doubao", "yuanbao",
+    # 通用中转站
+    "openai-proxy", "claude-proxy",
 ])
 
 

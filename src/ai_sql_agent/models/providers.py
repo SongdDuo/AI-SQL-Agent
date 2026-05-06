@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleModel(BaseModel):
-    """Provider for OpenAI-compatible APIs (GPT, GLM, MiMo, DeepSeek, Qwen, etc.)."""
+    """Provider for OpenAI-compatible APIs (GPT, GLM, MiMo, DeepSeek, Qwen, LongCat, Kimi, Doubao, Yuanbao, Grok, etc.)."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,7 +36,7 @@ class OpenAICompatibleModel(BaseModel):
 
 
 class ClaudeModel(BaseModel):
-    """Provider for Anthropic Claude API."""
+    """Provider for Anthropic Claude API (official and proxy)."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -70,17 +70,36 @@ class ClaudeModel(BaseModel):
 
 # Provider registry
 PROVIDER_REGISTRY = {
-    "openai": OpenAICompatibleModel,
-    "glm": OpenAICompatibleModel,
-    "mimo": OpenAICompatibleModel,
-    "deepseek": OpenAICompatibleModel,
-    "qwen": OpenAICompatibleModel,
+    # LongCat 系列（默认推荐）
     "longcat": OpenAICompatibleModel,
     "longcat-flash": OpenAICompatibleModel,
     "longcat-thinking": OpenAICompatibleModel,
     "longcat-omni": OpenAICompatibleModel,
     "longcat-lite": OpenAICompatibleModel,
+    # OpenAI
+    "openai": OpenAICompatibleModel,
+    # 智谱 GLM
+    "glm": OpenAICompatibleModel,
+    # 小米 MiMo
+    "mimo": OpenAICompatibleModel,
+    # DeepSeek
+    "deepseek": OpenAICompatibleModel,
+    # 阿里通义千问
+    "qwen": OpenAICompatibleModel,
+    # 月之暗面 Kimi
+    "kimi": OpenAICompatibleModel,
+    # 字节跳动 豆包（火山方舟）
+    "doubao": OpenAICompatibleModel,
+    # 腾讯混元 元宝
+    "yuanbao": OpenAICompatibleModel,
+    # xAI Grok
+    "grok": OpenAICompatibleModel,
+    # 通用 OpenAI 兼容中转站
+    "openai-proxy": OpenAICompatibleModel,
+    # Anthropic Claude（官方）
     "claude": ClaudeModel,
+    # 通用 Anthropic 兼容中转站
+    "claude-proxy": ClaudeModel,
 }
 
 

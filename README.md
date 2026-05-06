@@ -216,32 +216,74 @@ print(f"子任务: {len(result['sub_tasks'])} 个")
 print(f"摘要:\n{result['summary']}")
 ```
 
-## 🧠 支持的模型
+## 🧠 支持的模型（16 家）
 
-| 提供商 | provider 参数 | 说明 |
-|--------|-------------|------|
-| 🐱 LongCat | `longcat` | LongCat-2.0-Preview（默认推荐） |
-| ⚡ LongCat Flash | `longcat-flash` | LongCat-Flash-Chat（快速响应） |
-| 🧠 LongCat Thinking | `longcat-thinking` | LongCat-Flash-Thinking-2601（强推理） |
-| 🎭 LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603（多模态） |
-| 🪶 LongCat Lite | `longcat-lite` | LongCat-Flash-Lite（轻量快速） |
-| OpenAI GPT | `openai` | GPT-4o 等 |
-| 智谱 GLM | `glm` | GLM-4-Plus |
-| 小米 MiMo | `mimo` | MiMo V2.5 |
-| Anthropic Claude | `claude` | Claude Sonnet |
-| DeepSeek | `deepseek` | DeepSeek Chat |
-| 阿里通义 | `qwen` | Qwen-Plus |
+### 🐱 LongCat 系列（默认推荐）
 
-### LongCat 模型配置
+| 提供商 | provider 参数 | 默认模型 | 特点 |
+|--------|-------------|---------|------|
+| LongCat | `longcat` | longcat-2.0-preview | 综合能力最强 |
+| LongCat Flash | `longcat-flash` | LongCat-Flash-Chat | 快速响应 |
+| LongCat Thinking | `longcat-thinking` | LongCat-Flash-Thinking-2601 | 强推理能力 |
+| LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603 | 多模态 |
+| LongCat Lite | `longcat-lite` | LongCat-Flash-Lite | 轻量快速 |
+
+### 🌍 国际主流
+
+| 提供商 | provider 参数 | 默认模型 | 接口协议 |
+|--------|-------------|---------|---------|
+| OpenAI | `openai` | gpt-4o | OpenAI |
+| Anthropic Claude | `claude` | claude-sonnet-4-20250514 | Anthropic |
+| xAI Grok | `grok` | grok-4-1-fast | OpenAI 兼容 |
+
+### 🇨🇳 国产主流
+
+| 提供商 | provider 参数 | 默认模型 | 接口协议 |
+|--------|-------------|---------|---------|
+| 智谱 GLM | `glm` | glm-4-plus | OpenAI 兼容 |
+| 小米 MiMo | `mimo` | mimo-v2.5 | OpenAI 兼容 |
+| DeepSeek | `deepseek` | deepseek-chat | OpenAI 兼容 |
+| 阿里通义 | `qwen` | qwen-plus | OpenAI 兼容 |
+| 月之暗面 Kimi | `kimi` | kimi-k2.6 | OpenAI 兼容 |
+| 字节豆包 | `doubao` | doubao-pro-32k | OpenAI 兼容 |
+| 腾讯元宝 | `yuanbao` | hunyuan-turbo | OpenAI 兼容 |
+
+### 🔄 通用中转站
+
+| 提供商 | provider 参数 | 接口协议 | 说明 |
+|--------|-------------|---------|------|
+| OpenAI 中转 | `openai-proxy` | OpenAI 兼容 | 支持 One-API / New-API 等中转 |
+| Claude 中转 | `claude-proxy` | Anthropic | 支持 Claude 协议中转站 |
+
+### 环境变量配置
+
+所有模型均通过 `AI_{PROVIDER}_API_KEY` 配置密钥，例如：
 
 ```bash
-# .env 配置
+# LongCat（默认推荐）
 AI_DEFAULT_PROVIDER=longcat
-AI_LONGCAT_API_KEY=your_api_key_here
+AI_LONGCAT_API_KEY=your_api_key
 
-# 可选：自定义 base URL 和模型
-AI_LONGCAT_BASE_URL=https://api.longcat.chat/openai
-AI_LONGCAT_MODEL=longcat-2.0-preview
+# Kimi
+AI_KIMI_API_KEY=your_api_key
+
+# 豆包
+AI_DOUBAO_API_KEY=your_api_key
+
+# 元宝
+AI_YUANBAO_API_KEY=your_api_key
+
+# Grok
+AI_GROK_API_KEY=your_api_key
+
+# 通用中转站（需自行填写 base_url 和 model）
+AI_OPENAI_PROXY_API_KEY=your_api_key
+AI_OPENAI_PROXY_BASE_URL=https://your-proxy-url/v1
+AI_OPENAI_PROXY_MODEL=gpt-4o
+
+AI_CLAUDE_PROXY_API_KEY=your_api_key
+AI_CLAUDE_PROXY_BASE_URL=https://your-proxy-url
+AI_CLAUDE_PROXY_MODEL=claude-sonnet-4-20250514
 ```
 
 ## 🗄️ 支持的数据库方言
