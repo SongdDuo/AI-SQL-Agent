@@ -141,7 +141,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 :root{
   --bg:#f5f5f7;--bg2:#ffffff;--surface:rgba(255,255,255,.72);--surface-solid:#ffffff;
   --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);
-  --text:#1d1d1f;--text2:#6e6e73;--text3:#86868b;
+  --text:#1d1d1f;--text2:#636366;--text3:#8e8e93;
   --accent:#0071e3;--accent-hover:#0077ed;--accent-light:rgba(0,113,227,.1);
   --green:#34c759;--green-bg:rgba(52,199,89,.1);
   --red:#ff3b30;--red-bg:rgba(255,59,48,.08);
@@ -159,7 +159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 body.dark{
   --bg:#000000;--bg2:#1c1c1e;--surface:rgba(28,28,30,.72);--surface-solid:#1c1c1e;
   --border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.16);
-  --text:#f5f5f7;--text2:#86868b;--text3:#636366;
+  --text:#f5f5f7;--text2:#a1a1a6;--text3:#8e8e93;
   --accent:#0a84ff;--accent-hover:#409cff;--accent-light:rgba(10,132,255,.15);
   --green:#30d158;--green-bg:rgba(48,209,88,.12);
   --red:#ff453a;--red-bg:rgba(255,69,58,.1);
