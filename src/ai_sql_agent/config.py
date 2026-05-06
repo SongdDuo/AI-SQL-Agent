@@ -6,8 +6,15 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load .env.local first (local secrets, git-ignored), then .env as fallback
+_env_local = Path(__file__).resolve().parent.parent.parent / ".env.local"
+_env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+if _env_local.exists():
+    load_dotenv(str(_env_local))
+elif _env_file.exists():
+    load_dotenv(str(_env_file))
 
 
 @dataclass
