@@ -41,38 +41,38 @@ NL_TO_SQL_PROMPT = """\
 """
 
 EXPLAIN_SQL_PROMPT = """\
-Explain the following SQL query step by step.
+请用中文逐步解释以下 SQL。
 
-Dialect: {dialect}
+数据库方言：{dialect}
 
-SQL:
+SQL：
 ```sql
 {sql}
 ```
 
-Provide:
-1. Step-by-step breakdown
-2. Tables and joins involved
-3. Performance analysis
-4. Potential issues
+请包含：
+1. 执行逻辑拆解
+2. 涉及的数据表和关联关系
+3. 性能分析
+4. 潜在问题
 """
 
 OPTIMIZE_SQL_PROMPT = """\
-Analyze and optimize this SQL query for {dialect}.
+请针对 {dialect} 方言分析并优化以下 SQL。
 
 SQL:
 ```sql
 {sql}
 ```
 
-Respond with JSON:
+请用 JSON 回复，字段内容必须使用中文：
 {{
-  "issues": ["list of problems found"],
-  "optimized_sql": "improved query",
+  "issues": ["发现的问题列表"],
+  "optimized_sql": "优化后的 SQL",
   "changes": [
-    {{"what": "description", "why": "reason", "type": "index|rewrite|hint"}}
+    {{"what": "变更说明", "why": "变更原因", "type": "index|rewrite|hint"}}
   ],
-  "expected_gain": "estimated improvement"
+  "expected_gain": "预期收益"
 }}
 """
 
@@ -100,29 +100,29 @@ ANALYZE_RESULT_PROMPT = """\
 """
 
 AGENT_TASK_DECOMPOSE_PROMPT = """\
-You are a SQL Agent. Decompose the following user task into sub-tasks.
+你是一个 SQL Agent。请将以下用户任务拆解为可执行子任务。
 
-Available tools:
-- generate_sql: Convert natural language to SQL
-- execute_sql: Execute a SQL query against the database
-- explain_sql: Explain a SQL query
-- optimize_sql: Optimize a SQL query
-- analyze_result: Analyze query results
+可用工具：
+- generate_sql: 将自然语言转换为 SQL
+- execute_sql: 执行 SQL
+- explain_sql: 解释 SQL
+- optimize_sql: 优化 SQL
+- analyze_result: 分析查询结果
 
-Database dialect: {dialect}
+数据库方言：{dialect}
 {schema_context}
 
-User task: {task}
+用户任务：{task}
 
-Respond with JSON:
+请用 JSON 回复，字段内容必须使用中文：
 {{
-  "understanding": "your understanding of the task",
+  "understanding": "你对任务的理解",
   "sub_tasks": [
     {{
       "id": 1,
       "tool": "tool_name",
-      "input": "input for the tool",
-      "purpose": "why this step"
+      "input": "工具输入",
+      "purpose": "执行这一步的原因"
     }}
   ],
   "depends_on": {{}}
@@ -130,18 +130,18 @@ Respond with JSON:
 """
 
 SCHEMA_ANALYSIS_PROMPT = """\
-Analyze this database schema and suggest improvements.
+请用中文分析以下数据库结构并给出改进建议。
 
-Dialect: {dialect}
+数据库方言：{dialect}
 
-Schema:
+Schema：
 {schema}
 
-Provide:
-1. Missing indexes
-2. Data type improvements
-3. Normalization issues
-4. Naming conventions
+请包含：
+1. 缺失索引
+2. 字段类型改进
+3. 范式或冗余问题
+4. 命名规范建议
 """
 
 MULTI_TURN_SYSTEM_PROMPT = """\
@@ -161,38 +161,39 @@ MULTI_TURN_SYSTEM_PROMPT = """\
 """
 
 AGENT_TOOL_CALLING_PROMPT = """\
-You are a SQL Agent with access to the following tools:
+你是一个 SQL Agent，可以使用以下工具：
 
 {tools}
 
-Database dialect: {dialect}
+数据库方言：{dialect}
 {schema_context}
 
-User task: {task}
+用户任务：{task}
 
-Think step by step (Chain of Thought):
-1. Understand what the user wants
-2. Determine which tools are needed
-3. Plan the execution order
-4. Consider if SQL validation/fixing is needed
+请逐步思考：
+1. 理解用户目标
+2. 判断需要哪些工具
+3. 规划执行顺序
+4. 判断是否需要 SQL 校验或修复
 
-Respond with JSON:
+请用 JSON 回复，字段内容必须使用中文：
 {{
-  "understanding": "your understanding of the task",
-  "reasoning": "step-by-step reasoning",
+  "understanding": "你对任务的理解",
+  "reasoning": "分步骤推理",
   "sub_tasks": [
     {{
       "id": 1,
       "tool": "tool_name",
-      "input": "input for the tool",
-      "purpose": "why this step is needed"
+      "input": "工具输入",
+      "purpose": "为什么需要这一步"
     }}
   ]
 }}
 
-Important:
-- Always validate generated SQL before execution
-- If SQL execution fails, use fix_sql tool with the error message
-- Use analyze_result to interpret query results
-- End with final_answer to summarize for the user
+重要：
+- 执行前始终校验生成的 SQL
+- 如果 SQL 执行失败，结合错误信息使用 fix_sql
+- 使用 analyze_result 解读查询结果
+- 最后用 final_answer 为用户总结
+- 所有说明、原因、结论都必须使用中文
 """
