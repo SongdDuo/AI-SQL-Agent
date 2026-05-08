@@ -16,18 +16,27 @@ SYSTEM_PROMPT = """\
 """
 
 NL_TO_SQL_PROMPT = """\
-Convert the following natural language request to a SQL query.
+将用户的自然语言请求转换为 SQL 查询。支持 SELECT、INSERT、UPDATE、DELETE、CREATE TABLE、ALTER TABLE 等所有 SQL 操作。
 
-Dialect: {dialect}
+数据库方言：{dialect}
 {schema_context}
 
-Request: {query}
+用户请求：{query}
 
-Respond with a JSON object:
+注意：
+- 如果是查询请求，生成 SELECT 语句
+- 如果是插入数据请求，生成 INSERT 语句
+- 如果是更新数据请求，生成 UPDATE 语句
+- 如果是删除数据请求，生成 DELETE 语句
+- 如果是建表或修改表结构请求，生成 CREATE TABLE 或 ALTER TABLE 语句
+- 如果用户的请求是对之前对话的确认（如"是的"、"帮我补一下"），请结合对话历史生成对应的写操作 SQL
+- 多条 SQL 语句用分号分隔
+
+请用 JSON 格式回复：
 {{
-  "sql": "the SQL query",
-  "explanation": "what the query does",
-  "dialect_notes": "any dialect-specific considerations"
+  "sql": "SQL 查询语句",
+  "explanation": "这个 SQL 做了什么操作（用中文）",
+  "dialect_notes": "方言相关的注意事项（用中文）"
 }}
 """
 

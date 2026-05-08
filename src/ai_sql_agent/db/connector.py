@@ -68,10 +68,11 @@ class DBConnector:
             )
         return self._connection
 
-    def execute(self, sql: str, params: Optional[tuple] = None) -> Tuple[List[Dict], List[str]]:
-        """Execute SQL and return (rows as dicts, column names).
+    def execute(self, sql: str, params: Optional[tuple] = None) -> Tuple[List[Dict], List[str], int]:
+        """Execute SQL and return (rows as dicts, column names, affected_rows).
         Supports multiple statements separated by semicolons — executes them sequentially.
         Returns results from the last statement that produces output.
+        affected_rows: cursor.rowcount for write operations, row count for SELECT.
         """
         import re as _re
         conn = self._connect()
@@ -85,16 +86,19 @@ class DBConnector:
                     statements.append(stmt)
 
             if not statements:
-                return [], []
+                return [], [], 0
 
-            rows, columns = [], []
+            rows, columns, affected = [], [], 0
             for stmt in statements:
                 cursor.execute(stmt, params or ())
                 if cursor.description:
                     columns = [desc[0] for desc in cursor.description]
                     rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                    affected = len(rows)
+                else:
+                    affected = cursor.rowcount
             conn.commit()
-            return rows, columns
+            return rows, columns, affected
         except Exception as e:
             conn.rollback()
             raise

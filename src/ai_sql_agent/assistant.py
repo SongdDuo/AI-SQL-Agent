@@ -153,10 +153,10 @@ class SQLAssistant:
     def execute_sql(self, sql: str, params: Optional[tuple] = None) -> Dict[str, Any]:
         """Execute SQL and return results."""
         if not self._db:
-            return {"error": "Database not configured. Set DB_* environment variables."}
+            return {"error": "数据库未配置。"}
         try:
-            rows, columns = self._db.execute(sql, params)
-            return {"rows": rows, "columns": columns, "row_count": len(rows)}
+            rows, columns, affected = self._db.execute(sql, params)
+            return {"rows": rows, "columns": columns, "row_count": len(rows), "affected_rows": affected}
         except Exception as e:
             return {"error": str(e), "sql": sql}
 

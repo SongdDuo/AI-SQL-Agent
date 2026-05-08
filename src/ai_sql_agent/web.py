@@ -878,6 +878,10 @@ async function sendQuery() {
     if (data.rows && data.columns) {
       html += `<div class="row-count">📊 ${data.row_count} 行结果</div>`;
       html += renderTable(data.rows, data.columns);
+    } else if (data.sql && !data.error) {
+      // 写操作（INSERT/UPDATE/DELETE/CREATE）成功
+      const affected = data.affected_rows || 0;
+      html += `<div class="row-count" style="color:var(--green)">&#10003; 执行成功，影响 ${affected} 行</div>`;
     }
     if (data.analysis) {
       const mdHtml = (typeof marked !== 'undefined') ? marked.parse(data.analysis) : escapeHtml(data.analysis);
@@ -1010,37 +1014,39 @@ class Handler(SimpleHTTPRequestHandler):
                     dialect=dialect,
                 )
 
-                # 判断是否为 SQL 生成请求（包含 SQL 关键词或数据库操作意图）
-                sql_keywords = ("select", "insert", "update", "delete", "create", "drop",
-                                "alter", "show", "describe", "explain", "查询", "建表",
-                                "插入", "更新", "删除", "修改", "显示")
-                is_sql_request = any(kw in query.lower() for kw in sql_keywords)
+                # 统一走 generate_sql，LLM 根据对话上下文判断操作类型
+                # 将对话历史拼接到 query 中，让 LLM 理解上下文
+                contextual_query = query
+                if history:
+                    # 最近 5 轮对话作为上下文
+                    recent = history[-10:]
+                    ctx_parts = []
+                    for h in recent:
+                        role_label = "用户" if h["role"] == "user" else "AI"
+                        ctx_parts.append(f"[{role_label}] {h['content']}")
+                    context_str = "\n".join(ctx_parts)
+                    contextual_query = f"对话历史：\n{context_str}\n\n当前请求：{query}"
 
-                response = {}
+                result = assistant.generate_sql(contextual_query)
+                response = {
+                    "understanding": query,
+                    "sql": result.get("sql", ""),
+                    "explanation": result.get("explanation", ""),
+                }
 
-                if is_sql_request:
-                    result = assistant.generate_sql(query)
-                    response["understanding"] = query
-                    response["sql"] = result.get("sql", "")
-                    response["explanation"] = result.get("explanation", "")
-
-                    sql = result.get("sql", "")
-                    if sql:
-                        try:
-                            rows, columns = assistant._db.execute(sql)
-                            response["rows"] = rows[:50]
-                            response["columns"] = columns
-                            response["row_count"] = len(rows)
-                            if rows:
-                                analysis = assistant.analyze_result(query, rows, len(rows))
-                                response["analysis"] = analysis
-                        except Exception as e:
-                            response["error"] = f"SQL 执行错误：{e}"
-                else:
-                    # 非 SQL 请求（如"给我解释下"），使用对话模式，携带历史
-                    schema_ctx = assistant._db.get_schema_context() if assistant._db else ""
-                    answer = assistant.chat_multi_turn(query, history=history, schema_context=schema_ctx)
-                    response["answer"] = answer
+                sql = result.get("sql", "")
+                if sql:
+                    try:
+                        rows, columns, affected = assistant._db.execute(sql)
+                        response["rows"] = rows[:50] if rows else None
+                        response["columns"] = columns if columns else None
+                        response["row_count"] = len(rows)
+                        response["affected_rows"] = affected
+                        if rows:
+                            analysis = assistant.analyze_result(query, rows, len(rows))
+                            response["analysis"] = analysis
+                    except Exception as e:
+                        response["error"] = f"SQL 执行错误：{e}"
 
                 assistant.close()
                 return response
