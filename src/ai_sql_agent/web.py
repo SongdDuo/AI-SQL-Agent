@@ -603,7 +603,7 @@ if(typeof marked==='undefined'){
       <div class="config-row">
         <label>方言</label>
         <select id="dialect">
-          <option value="sqlite">🪶 SQLite</option>
+          <option value="sqlite">SQLite</option>
           <option value="mysql">🐬 MySQL</option>
           <option value="dm">🐉 达梦 DM</option>
           <option value="postgres">🐘 PostgreSQL</option>
@@ -688,7 +688,7 @@ const providerOptions = [
   {value:'deepseek', label:'🐋 DeepSeek-V4'},
   {value:'qwen', label:'☁️ 通义千问 Qwen3.6'},
   {value:'kimi', label:'🌙 Kimi-K2.6'},
-  {value:'doubao', label:'🫘 豆包 Doubao-Seed-1.6'},
+  {value:'doubao', label:'豆包 Doubao-Seed-1.6'},
   {value:'yuanbao', label:'💎 元宝 hunyuan-turbo'},
 ];
 function updateBadge() {
