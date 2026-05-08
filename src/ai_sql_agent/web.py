@@ -62,6 +62,64 @@ CREATE TABLE IF NOT EXISTS product (
     price DECIMAL(10,2),
     stock INTEGER DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS order_detail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(15,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES product(id)
+);
+CREATE TABLE IF NOT EXISTS attendance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL,
+    check_in_time DATETIME NOT NULL,
+    check_out_time DATETIME,
+    work_hours DECIMAL(5,2),
+    status INTEGER DEFAULT 1,
+    FOREIGN KEY (employee_id) REFERENCES employee(id)
+);
+CREATE TABLE IF NOT EXISTS customer_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    order_id INTEGER,
+    rating INTEGER CHECK(rating >= 1 AND rating <= 5),
+    comment TEXT,
+    feedback_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status INTEGER DEFAULT 1,
+    FOREIGN KEY (customer_id) REFERENCES customer(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+CREATE TABLE IF NOT EXISTS project (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    department_id INTEGER,
+    start_date DATE,
+    end_date DATE,
+    status INTEGER DEFAULT 1,
+    budget DECIMAL(15,2),
+    FOREIGN KEY (department_id) REFERENCES department(id)
+);
+CREATE TABLE IF NOT EXISTS employee_skill (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL,
+    skill_name VARCHAR(100) NOT NULL,
+    proficiency_level INTEGER CHECK(proficiency_level >= 1 AND proficiency_level <= 5),
+    certification VARCHAR(200),
+    FOREIGN KEY (employee_id) REFERENCES employee(id)
+);
+CREATE TABLE IF NOT EXISTS salary_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL,
+    old_salary DECIMAL(12,2),
+    new_salary DECIMAL(12,2),
+    change_date DATE,
+    reason TEXT,
+    FOREIGN KEY (employee_id) REFERENCES employee(id)
+);
 """
 
 SAMPLE_DATA_SQL = """
@@ -110,6 +168,76 @@ INSERT OR IGNORE INTO product (id, name, category, price, stock) VALUES
 (6, '鼠标', '电子产品', 199, 500),
 (7, '耳机', '电子产品', 899, 250),
 (8, '白板', '办公用品', 399, 150);
+INSERT OR IGNORE INTO order_detail (id, order_id, product_id, quantity, unit_price, subtotal) VALUES
+(1, 1, 1, 1, 6999, 6999),
+(2, 1, 6, 2, 199, 398),
+(3, 1, 7, 1, 899, 899),
+(4, 2, 3, 1, 2499, 2499),
+(5, 2, 2, 1, 599, 599),
+(6, 3, 4, 1, 1299, 1299),
+(7, 3, 8, 2, 399, 798),
+(8, 4, 1, 2, 6999, 13998),
+(9, 4, 3, 2, 2499, 4998),
+(10, 5, 5, 1, 3599, 3599),
+(11, 6, 1, 3, 6999, 20997),
+(12, 6, 7, 5, 899, 4495),
+(13, 7, 2, 3, 599, 1797),
+(14, 7, 6, 10, 199, 1990),
+(15, 8, 4, 3, 1299, 3897),
+(16, 9, 1, 2, 6999, 13998),
+(17, 9, 3, 3, 2499, 7497),
+(18, 10, 5, 2, 3599, 7198),
+(19, 11, 1, 2, 6999, 13998),
+(20, 12, 2, 2, 599, 1198);
+INSERT OR IGNORE INTO attendance (id, employee_id, check_in_time, check_out_time, work_hours, status) VALUES
+(1, 1, '2025-05-06 09:00:00', '2025-05-06 18:00:00', 8.0, 1),
+(2, 2, '2025-05-06 09:15:00', '2025-05-06 18:00:00', 7.75, 2),
+(3, 3, '2025-05-06 08:50:00', '2025-05-06 17:30:00', 8.0, 1),
+(4, 4, '2025-05-06 09:00:00', '2025-05-06 16:00:00', 7.0, 3),
+(5, 5, '2025-05-06 09:00:00', '2025-05-06 18:30:00', 8.5, 1),
+(6, 6, '2025-05-06 10:00:00', '2025-05-06 18:00:00', 7.0, 2),
+(7, 7, '2025-05-06 08:45:00', '2025-05-06 17:45:00', 8.0, 1),
+(8, 8, '2025-05-06 09:00:00', NULL, NULL, 4),
+(9, 9, '2025-05-06 09:30:00', '2025-05-06 18:00:00', 7.5, 2),
+(10, 10, '2025-05-06 08:30:00', '2025-05-06 19:00:00', 9.5, 1);
+INSERT OR IGNORE INTO customer_feedback (id, customer_id, order_id, rating, comment, feedback_date, status) VALUES
+(1, 1, 1, 5, '非常满意，笔记本电脑质量很好，物流也很快！', '2025-04-03 10:00:00', 2),
+(2, 2, 2, 4, '显示器不错，键盘手感一般。', '2025-04-07 14:30:00', 2),
+(3, 3, 4, 5, '买了两台笔记本，性能很强，推荐！', '2025-04-17 09:00:00', 1),
+(4, 4, 5, 3, '打印机到货有划痕，希望加强包装。', '2025-04-20 16:00:00', 1),
+(5, 5, 6, 5, '大批量采购，价格优惠，服务到位。', '2025-04-22 11:00:00', 2),
+(6, 1, 9, 4, '第二次购买了，依然很满意。', '2025-04-30 08:00:00', 3),
+(7, 2, 7, 2, '键盘有质量问题，部分按键失灵。', '2025-04-24 15:00:00', 1);
+INSERT OR IGNORE INTO project (id, name, description, department_id, start_date, end_date, status, budget) VALUES
+(1, 'ERP 系统升级', '企业资源计划系统全面升级，提升运营效率', 1, '2025-01-15', '2025-06-30', 1, 800000),
+(2, '客户管理平台', '构建统一的客户关系管理平台', 2, '2025-03-01', '2025-08-31', 1, 500000),
+(3, '数据分析大屏', '实时业务数据可视化大屏项目', 1, '2025-04-01', '2025-07-15', 1, 300000),
+(4, '员工培训计划', '2025 年度全员技能提升培训', 4, '2025-02-01', '2025-12-31', 1, 200000),
+(5, '财务审计系统', '内部审计流程数字化改造', 5, '2025-05-01', '2025-09-30', 1, 400000);
+INSERT OR IGNORE INTO employee_skill (id, employee_id, skill_name, proficiency_level, certification) VALUES
+(1, 1, 'Python', 5, 'Python 高级开发认证'),
+(2, 1, 'SQL', 4, 'MySQL 认证专家'),
+(3, 1, '机器学习', 3, NULL),
+(4, 2, 'Java', 4, 'Oracle Java 认证'),
+(5, 2, 'SQL', 3, NULL),
+(6, 3, 'Python', 5, '数据分析师认证'),
+(7, 3, '数据可视化', 4, 'Tableau 认证'),
+(8, 4, '销售管理', 4, '高级销售经理认证'),
+(9, 5, '谈判技巧', 5, NULL),
+(10, 6, '市场营销', 4, '数字营销师'),
+(11, 7, '系统架构', 5, 'AWS 解决方案架构师'),
+(12, 8, '人力资源管理', 4, 'HR 管理师'),
+(13, 9, '财务管理', 5, '注册会计师 CPA'),
+(14, 10, '项目管理', 5, 'PMP 项目管理认证'),
+(15, 10, 'Python', 4, NULL);
+INSERT OR IGNORE INTO salary_history (id, employee_id, old_salary, new_salary, change_date, reason) VALUES
+(1, 1, 22000, 25000, '2025-01-01', '年度调薪，绩效优秀'),
+(2, 2, 15000, 18000, '2025-01-01', '年度调薪'),
+(3, 3, 28000, 30000, '2025-01-01', '年度调薪，晋升'),
+(4, 4, 13000, 15000, '2025-01-01', '年度调薪'),
+(5, 5, 20000, 22000, '2025-01-01', '年度调薪'),
+(6, 7, 25000, 28000, '2025-01-01', '年度调薪，技术骨干'),
+(7, 10, 32000, 35000, '2025-01-01', '年度调薪，晋升技术总监');
 """
 
 
@@ -418,7 +546,30 @@ body.light{
 .md-content hr{border:none;border-top:1px solid var(--border);margin:10px 0}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>if(typeof marked==='undefined'){window.marked={parse:function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}}}</script>
+<script>
+if(typeof marked==='undefined'){
+  // Fallback: basic markdown parser when CDN fails
+  window.marked={
+    parse:function(s){
+      if(!s)return '';
+      var h=s
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g,'<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+        .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+        .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+        .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+        .replace(/^- (.+)$/gm,'<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n?)+/g,function(m){return '<ul>'+m+'</ul>'})
+        .replace(/\n\n/g,'</p><p>')
+        .replace(/\n/g,'<br>');
+      return '<div class="md-content">'+h+'</div>';
+    }
+  };
+}
+</script>
 </head>
 <body>
 
@@ -621,6 +772,8 @@ const messagesEl = document.getElementById('chatMessages');
 const inputEl = document.getElementById('queryInput');
 const sendBtn = document.getElementById('sendBtn');
 let welcomeHidden = false;
+// 对话历史（多轮记忆）
+let chatHistory = [];
 
 function setQuery(q) {
   inputEl.value = q;
@@ -699,10 +852,18 @@ async function sendQuery() {
   sendBtn.disabled = true;
 
   try {
+    // 构建请求体，带上对话历史
+    const requestBody = {
+      query: q,
+      provider,
+      dialect,
+      api_key: apiKey || undefined,
+      history: chatHistory,  // 多轮对话历史
+    };
     const resp = await fetch('/api/ask', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({query: q, provider, dialect, api_key: apiKey || undefined})
+      body: JSON.stringify(requestBody)
     });
     const data = await resp.json();
     removeLoading();
@@ -723,13 +884,28 @@ async function sendQuery() {
       html += `<div class="md-content" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">${mdHtml}</div>`;
     }
     if (data.explanation && !data.analysis) {
-      html += `<div class="info-text" style="margin-top:8px">💡 ${escapeHtml(data.explanation)}</div>`;
+      const expHtml = (typeof marked !== 'undefined') ? marked.parse(data.explanation) : escapeHtml(data.explanation);
+      html += `<div class="md-content" style="margin-top:8px">💡 ${expHtml}</div>`;
     }
     if (data.error) {
-      html += `<div class="error-box">❌ ${data.error}</div>`;
+      html += `<div class="error-box">❌ ${escapeHtml(data.error)}</div>`;
     }
-    if (!html) html = data.answer || data.summary || '无返回结果';
+    if (!html) {
+      const answerText = data.answer || data.summary || '无返回结果';
+      const answerHtml = (typeof marked !== 'undefined') ? marked.parse(answerText) : escapeHtml(answerText);
+      html = `<div class="md-content">${answerHtml}</div>`;
+    }
     addMsg('assistant', html);
+
+    // 更新对话历史
+    chatHistory.push({role: 'user', content: q});
+    // 提取纯文本作为 assistant 回复记录
+    const assistantText = data.answer || data.summary || data.explanation || data.analysis || data.error || data.sql || '无返回结果';
+    chatHistory.push({role: 'assistant', content: assistantText});
+    // 只保留最近 20 轮
+    if (chatHistory.length > 40) {
+      chatHistory = chatHistory.slice(-40);
+    }
   } catch (e) {
     removeLoading();
     addMsg('assistant', `<div class="error-box">❌ 请求失败: ${e.message}</div>`);
@@ -805,6 +981,7 @@ class Handler(SimpleHTTPRequestHandler):
         provider = body.get('provider', 'longcat')
         dialect_str = body.get('dialect', 'sqlite')
         api_key = body.get('api_key', '')
+        history = body.get('history', [])  # 多轮对话历史
 
         if not query:
             return {"error": "查询不能为空"}
@@ -860,9 +1037,9 @@ class Handler(SimpleHTTPRequestHandler):
                         except Exception as e:
                             response["error"] = f"SQL 执行错误：{e}"
                 else:
-                    # 非 SQL 请求（如"给我解释下"），使用对话模式
+                    # 非 SQL 请求（如"给我解释下"），使用对话模式，携带历史
                     schema_ctx = assistant._db.get_schema_context() if assistant._db else ""
-                    answer = assistant.chat_multi_turn(query, schema_context=schema_ctx)
+                    answer = assistant.chat_multi_turn(query, history=history, schema_context=schema_ctx)
                     response["answer"] = answer
 
                 assistant.close()
