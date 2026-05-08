@@ -122,8 +122,8 @@ class SQLAssistant:
     def _extract_sql_from_text(self, text: str) -> str:
         """Try to extract a SQL query from free-form text when JSON parsing fails."""
         import re as _re
-        # Look for SELECT/INSERT/UPDATE/DELETE ... ; or end of string
-        for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE", "WITH"):
+        # Look for common SQL operations ... ; or end of string
+        for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "WITH"):
             pattern = _re.compile(rf"({keyword}\b.*?)(?:;|$)", _re.IGNORECASE | _re.DOTALL)
             match = pattern.search(text)
             if match:
