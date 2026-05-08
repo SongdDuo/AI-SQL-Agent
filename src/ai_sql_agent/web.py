@@ -7,6 +7,7 @@ import sqlite3
 import sys
 import tempfile
 import threading
+from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
@@ -985,10 +986,13 @@ class Handler(SimpleHTTPRequestHandler):
         provider = body.get('provider', 'longcat')
         dialect_str = body.get('dialect', 'sqlite')
         api_key = body.get('api_key', '')
-        history = body.get('history', [])  # 多轮对话历史
+        history = body.get('history', [])
 
         if not query:
             return {"error": "查询不能为空"}
+
+        logger.info(f"[Web] 用户消息: {query}")
+        logger.debug(f"[Web] 对话历史: {len(history)} 条, 模型: {provider}, 方言: {dialect_str}")
 
         try:
             dialect_map = {
@@ -1048,6 +1052,17 @@ class Handler(SimpleHTTPRequestHandler):
                     except Exception as e:
                         response["error"] = f"SQL 执行错误：{e}"
 
+                # 记录 AI 回复摘要到日志
+                ai_summary = result.get("explanation", "") or result.get("sql", "")
+                if response.get("error"):
+                    logger.error(f"[Web] 执行错误: {response['error']}")
+                elif response.get("rows"):
+                    logger.info(f"[Web] AI 回复: {ai_summary[:100]}... | 返回 {response['row_count']} 行")
+                elif response.get("affected_rows") is not None:
+                    logger.info(f"[Web] AI 回复: {ai_summary[:100]}... | 影响 {response['affected_rows']} 行")
+                else:
+                    logger.info(f"[Web] AI 回复: {ai_summary[:100]}...")
+
                 assistant.close()
                 return response
             finally:
@@ -1057,7 +1072,7 @@ class Handler(SimpleHTTPRequestHandler):
                     pass
 
         except Exception as e:
-            logger.exception("ask failed")
+            logger.exception(f"[Web] 处理异常: {e}")
             return {"error": str(e)}
 
     def log_message(self, fmt, *args):
@@ -1066,8 +1081,35 @@ class Handler(SimpleHTTPRequestHandler):
 
 # ── Server entry ─────────────────────────────────────────────────────────────
 
+def _setup_web_logging():
+    """设置 Web 服务日志，按天写入 logs/web_YYYY-MM-DD.log"""
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    log_file = os.path.join(log_dir, f"web_{date_str}.log")
+
+    # 按天创建 handler，追加模式
+    file_handler = logging.FileHandler(log_file, encoding="utf-8", mode="a")
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s"
+    ))
+    file_handler.setLevel(logging.DEBUG)
+
+    # 给 web 相关的 logger 加 handler
+    for logger_name in ("ai_sql_agent.web", "ai_sql_agent.assistant", "ai_sql_agent.agent"):
+        lg = logging.getLogger(logger_name)
+        lg.setLevel(logging.DEBUG)
+        # 避免重复添加
+        if not any(isinstance(h, logging.FileHandler) and "web_" in str(h.baseFilename) for h in lg.handlers):
+            lg.addHandler(file_handler)
+
+    return log_file
+
+
 def start_web(host: str = "127.0.0.1", port: int = 8080):
     """Start the web UI server."""
+    log_file = _setup_web_logging()
+    logger.info(f"Web 服务日志文件: {log_file}")
     server = HTTPServer((host, port), Handler)
     url = f"http://{host}:{port}"
     msg = (

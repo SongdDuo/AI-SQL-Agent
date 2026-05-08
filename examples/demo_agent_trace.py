@@ -102,16 +102,38 @@ class TraceLogger:
         if content.count("\n") > 20:
             console.print(f"     [dim]... (还有 {content.count(chr(10)) - 20} 行)[/]")
 
-    def summary(self):
-        """打印 trace 摘要"""
+    def summary(self, log_file: str = None):
+        """打印 trace 摘要，从 log 文件读取"""
         console.print()
         console.rule("[bold white]📋 LLM 调用日志摘要[/]", style="white")
-        console.print(f"  共 {len(self.entries)} 条记录\n")
-        for i, entry in enumerate(self.entries):
-            icon = "📥" if entry["direction"] == "input" else "📤"
-            color = "blue" if entry["direction"] == "input" else "green"
-            content_preview = entry["content"].replace("\n", " ")[:80]
-            console.print(f"  [{i+1:02d}] [{color}]{icon} {entry['phase']:20s} {entry['direction']:6s}[/]  {content_preview}...")
+        # 优先从 log 文件读取
+        if log_file and os.path.exists(log_file):
+            with open(log_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            # 按 ==== 分隔符拆分各条记录
+            records = [r.strip() for r in content.split("=" * 80) if r.strip()]
+            # 过滤掉头部注释
+            records = [r for r in records if not r.startswith("#")]
+            console.print(f"  共 {len(records)} 条日志记录\n")
+            for i, record in enumerate(records):
+                lines = record.split("\n")
+                # 第一行是时间戳和 logger 名
+                header = lines[0] if lines else ""
+                # 找内容预览
+                content_lines = [l for l in lines[1:] if l.strip() and not l.startswith("─")]
+                content_preview = " ".join(content_lines)[:100] if content_lines else header
+                console.print(f"  [{i+1:02d}] {content_preview}...")
+            console.print()
+            console.print(f"  [dim]完整日志见: {log_file}[/]")
+        elif self.entries:
+            console.print(f"  共 {len(self.entries)} 条记录\n")
+            for i, entry in enumerate(self.entries):
+                icon = "📥" if entry["direction"] == "input" else "📤"
+                color = "blue" if entry["direction"] == "input" else "green"
+                content_preview = entry["content"].replace("\n", " ")[:80]
+                console.print(f"  [{i+1:02d}] [{color}]{icon} {entry['phase']:20s} {entry['direction']:6s}[/]  {content_preview}...")
+        else:
+            console.print("  暂无日志记录")
 
 
 # ── 示例数据库 ────────────────────────────────────────────────────────────────
@@ -645,7 +667,7 @@ def demo_full_agent_workflow():
         ))
 
         # ── 打印 LLM 调用日志摘要 ──
-        trace.summary()
+        trace.summary(log_file=log_file)
 
     finally:
         try:
