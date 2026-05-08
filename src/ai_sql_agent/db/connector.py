@@ -31,6 +31,81 @@ class DBConnector:
         self.dialect = _resolve_dialect(config.db_type)
         self._connection = None
 
+    @staticmethod
+    def _split_statements(sql: str) -> List[str]:
+        """Split SQL by statement semicolons while preserving quoted content."""
+        statements = []
+        current = []
+        in_single = False
+        in_double = False
+        in_line_comment = False
+        in_block_comment = False
+        i = 0
+
+        while i < len(sql):
+            ch = sql[i]
+            next_ch = sql[i + 1] if i + 1 < len(sql) else ""
+
+            if in_line_comment:
+                current.append(ch)
+                if ch in ("\n", "\r"):
+                    in_line_comment = False
+                i += 1
+                continue
+
+            if in_block_comment:
+                current.append(ch)
+                if ch == "*" and next_ch == "/":
+                    current.append(next_ch)
+                    in_block_comment = False
+                    i += 2
+                else:
+                    i += 1
+                continue
+
+            if not in_single and not in_double:
+                if ch == "-" and next_ch == "-":
+                    current.append(ch)
+                    current.append(next_ch)
+                    in_line_comment = True
+                    i += 2
+                    continue
+                if ch == "/" and next_ch == "*":
+                    current.append(ch)
+                    current.append(next_ch)
+                    in_block_comment = True
+                    i += 2
+                    continue
+                if ch == ";":
+                    stmt = "".join(current).strip()
+                    if stmt and not stmt.startswith("--"):
+                        statements.append(stmt)
+                    current = []
+                    i += 1
+                    continue
+
+            current.append(ch)
+
+            if ch == "'" and not in_double:
+                if in_single and next_ch == "'":
+                    current.append(next_ch)
+                    i += 2
+                    continue
+                in_single = not in_single
+            elif ch == '"' and not in_single:
+                if in_double and next_ch == '"':
+                    current.append(next_ch)
+                    i += 2
+                    continue
+                in_double = not in_double
+
+            i += 1
+
+        stmt = "".join(current).strip()
+        if stmt and not stmt.startswith("--"):
+            statements.append(stmt)
+        return statements
+
     def _connect(self):
         if self._connection:
             return self._connection
@@ -74,16 +149,10 @@ class DBConnector:
         Returns results from the last statement that produces output.
         affected_rows: cursor.rowcount for write operations, row count for SELECT.
         """
-        import re as _re
         conn = self._connect()
         cursor = conn.cursor()
         try:
-            # Split into individual statements (ignore empty ones and comments)
-            statements = []
-            for stmt in sql.split(";"):
-                stmt = stmt.strip()
-                if stmt and not stmt.startswith("--"):
-                    statements.append(stmt)
+            statements = self._split_statements(sql)
 
             if not statements:
                 return [], [], 0

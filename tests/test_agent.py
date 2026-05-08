@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from ai_sql_agent.config import AgentConfig, DBConfig, ModelProvider, build_provider
+from ai_sql_agent.db.connector import DBConnector
 from ai_sql_agent.db.dialects import Dialect, DialectType, convert_to_dm
 from ai_sql_agent.db.validator import SQLValidator, SQLAutoFixer, validate_and_fix
 from ai_sql_agent.utils.formatter import format_sql
@@ -149,3 +150,30 @@ class TestValidateAndFix:
         original = "SELECT id FROM users"
         result = validate_and_fix(original, DialectType.MYSQL)
         assert result["original_sql"] == original
+
+
+class TestDBConnector:
+    def test_execute_multiple_statements_with_semicolon_in_string(self):
+        db = DBConnector(DBConfig(db_type="sqlite", name=":memory:"))
+        try:
+            rows, columns, affected = db.execute(
+                """
+                CREATE TABLE note (id INTEGER PRIMARY KEY, content TEXT);
+                INSERT INTO note (id, content) VALUES (1, 'a;b');
+                SELECT content FROM note WHERE id = 1;
+                """
+            )
+            assert columns == ["content"]
+            assert rows == [{"content": "a;b"}]
+            assert affected == 1
+        finally:
+            db.close()
+
+
+class TestWebTemplate:
+    def test_session_list_script_uses_safe_event_binding(self):
+        from ai_sql_agent.web import HTML_TEMPLATE
+
+        assert "loadSession(\\'\" + s.id" not in HTML_TEMPLATE
+        assert "deleteSession(\\'\" + s.id" not in HTML_TEMPLATE
+        assert "addEventListener('click'" in HTML_TEMPLATE
