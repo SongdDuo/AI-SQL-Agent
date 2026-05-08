@@ -69,17 +69,32 @@ class DBConnector:
         return self._connection
 
     def execute(self, sql: str, params: Optional[tuple] = None) -> Tuple[List[Dict], List[str]]:
-        """Execute SQL and return (rows as dicts, column names)."""
+        """Execute SQL and return (rows as dicts, column names).
+        Supports multiple statements separated by semicolons — executes them sequentially.
+        Returns results from the last statement that produces output.
+        """
+        import re as _re
         conn = self._connect()
         cursor = conn.cursor()
         try:
-            cursor.execute(sql, params or ())
-            if cursor.description:
-                columns = [desc[0] for desc in cursor.description]
-                rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                return rows, columns
+            # Split into individual statements (ignore empty ones and comments)
+            statements = []
+            for stmt in sql.split(";"):
+                stmt = stmt.strip()
+                if stmt and not stmt.startswith("--"):
+                    statements.append(stmt)
+
+            if not statements:
+                return [], []
+
+            rows, columns = [], []
+            for stmt in statements:
+                cursor.execute(stmt, params or ())
+                if cursor.description:
+                    columns = [desc[0] for desc in cursor.description]
+                    rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
             conn.commit()
-            return [], []
+            return rows, columns
         except Exception as e:
             conn.rollback()
             raise

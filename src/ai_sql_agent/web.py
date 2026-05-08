@@ -832,26 +832,38 @@ class Handler(SimpleHTTPRequestHandler):
                     db_config=db_config,
                     dialect=dialect,
                 )
-                result = assistant.generate_sql(query)
 
-                response = {
-                    "understanding": query,
-                    "sql": result.get("sql", ""),
-                    "explanation": result.get("explanation", ""),
-                }
+                # 判断是否为 SQL 生成请求（包含 SQL 关键词或数据库操作意图）
+                sql_keywords = ("select", "insert", "update", "delete", "create", "drop",
+                                "alter", "show", "describe", "explain", "查询", "建表",
+                                "插入", "更新", "删除", "修改", "显示")
+                is_sql_request = any(kw in query.lower() for kw in sql_keywords)
 
-                sql = result.get("sql", "")
-                if sql:
-                    try:
-                        rows, columns = assistant._db.execute(sql)
-                        response["rows"] = rows[:50]
-                        response["columns"] = columns
-                        response["row_count"] = len(rows)
-                        if rows:
-                            analysis = assistant.analyze_result(query, rows, len(rows))
-                            response["analysis"] = analysis
-                    except Exception as e:
-                        response["error"] = f"SQL 执行错误: {e}"
+                response = {}
+
+                if is_sql_request:
+                    result = assistant.generate_sql(query)
+                    response["understanding"] = query
+                    response["sql"] = result.get("sql", "")
+                    response["explanation"] = result.get("explanation", "")
+
+                    sql = result.get("sql", "")
+                    if sql:
+                        try:
+                            rows, columns = assistant._db.execute(sql)
+                            response["rows"] = rows[:50]
+                            response["columns"] = columns
+                            response["row_count"] = len(rows)
+                            if rows:
+                                analysis = assistant.analyze_result(query, rows, len(rows))
+                                response["analysis"] = analysis
+                        except Exception as e:
+                            response["error"] = f"SQL 执行错误：{e}"
+                else:
+                    # 非 SQL 请求（如"给我解释下"），使用对话模式
+                    schema_ctx = assistant._db.get_schema_context() if assistant._db else ""
+                    answer = assistant.chat_multi_turn(query, schema_context=schema_ctx)
+                    response["answer"] = answer
 
                 assistant.close()
                 return response
