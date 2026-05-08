@@ -52,26 +52,22 @@ console = Console()
 # ── 日志记录器 ────────────────────────────────────────────────────────────────
 
 class TraceLogger:
-    """记录每次 LLM 调用的输入/输出，供调试和展示用。"""
+    """记录每次 LLM 调用的输入/输出，实时写入日志文件。"""
 
     def __init__(self, log_file: str = None):
         self.entries = []
         self.log_file = log_file
-        # 设置文件日志
+        self._fh = None
         if log_file:
             os.makedirs(os.path.dirname(log_file) or ".", exist_ok=True)
-            self._file_handler = logging.FileHandler(log_file, encoding="utf-8")
-            self._file_handler.setFormatter(logging.Formatter(
-                "%(asctime)s [%(levelname)s] %(message)s"
-            ))
-            self._logger = logging.getLogger("ai_sql_agent.trace")
-            self._logger.setLevel(logging.DEBUG)
-            self._logger.addHandler(self._file_handler)
-        else:
-            self._logger = None
+            self._fh = open(log_file, "w", encoding="utf-8")
+            self._fh.write(f"# AI SQL Agent — 执行日志\n")
+            self._fh.write(f"# 时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            self._fh.write(f"{'=' * 80}\n\n")
+            self._fh.flush()
 
     def log(self, phase: str, direction: str, content: str):
-        """记录一次 LLM 交互。phase=generate_sql/execute_sql/analyze_result 等, direction=input/output"""
+        """记录一次 LLM 交互，实时写入文件。"""
         entry = {
             "time": datetime.now().strftime("%H:%M:%S.%f")[:-3],
             "phase": phase,
@@ -79,8 +75,17 @@ class TraceLogger:
             "content": content,
         }
         self.entries.append(entry)
-        if self._logger:
-            self._logger.debug(f"[{phase}] {direction}:\n{content}\n{'─' * 60}")
+        if self._fh:
+            self._fh.write(f"[{entry['time']}] [{phase}] {direction}\n")
+            self._fh.write(f"{'─' * 60}\n")
+            self._fh.write(content.rstrip())
+            self._fh.write(f"\n{'=' * 80}\n\n")
+            self._fh.flush()
+
+    def close(self):
+        if self._fh:
+            self._fh.close()
+            self._fh = None
 
     def print_entry(self, entry: dict, max_content_len: int = 800):
         """在终端中打印一条 trace 记录（折叠显示）"""
@@ -253,9 +258,24 @@ def demo_full_agent_workflow():
     - 自动跳过 generate_sql 已执行的重复子任务
     - 记录每次 LLM 调用的输入/输出日志
     """
-    # 创建 trace 日志记录器
+    # 创建日志目录
     log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
-    trace = TraceLogger(log_file=os.path.join(log_dir, "agent_trace.log"))
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "agent_trace.log")
+
+    # 给 agent 和 assistant 的 logger 加文件 handler，实时记录所有 LLM 交互
+    _log_handler = logging.FileHandler(log_file, encoding="utf-8", mode="w")
+    _log_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(name)s] %(levelname)s\n%(message)s\n" + "─" * 60
+    ))
+    _log_handler.setLevel(logging.DEBUG)
+    for _logger_name in ("ai_sql_agent.agent", "ai_sql_agent.assistant"):
+        _lg = logging.getLogger(_logger_name)
+        _lg.setLevel(logging.DEBUG)
+        _lg.addHandler(_log_handler)
+
+    # trace 记录器（用于终端摘要展示）
+    trace = TraceLogger(log_file=None)
 
     # ── 初始化 ──
     console.print()
@@ -363,6 +383,11 @@ def demo_full_agent_workflow():
                     # 如果 generate_sql 已自动执行过，跳过重复
                     if "execute_sql" in auto_executed:
                         console.print("  [dim]⏭️  generate_sql 已自动执行，跳过重复步骤[/]")
+                        if last_exec_result:
+                            if last_exec_result.get("rows"):
+                                print_result_table(last_exec_result["columns"], last_exec_result["rows"])
+                            if last_exec_result.get("error"):
+                                console.print(f"[red]❌ 执行错误: {last_exec_result['error']}[/red]")
                         continue
                     sql_to_run = agent._resolve_sql(tool_input, last_sql)
                     exec_result = agent._tool_execute_sql(sql_to_run)
@@ -377,6 +402,11 @@ def demo_full_agent_workflow():
                     # 如果 generate_sql 已自动分析过，跳过重复
                     if "analyze_result" in auto_executed:
                         console.print("  [dim]⏭️  generate_sql 已自动分析，跳过重复步骤[/]")
+                        # 显示上一次的分析结论
+                        for prev_r in reversed(results):
+                            if prev_r.get("tool") == "analyze_result" and isinstance(prev_r.get("result"), str):
+                                console.print(Panel(prev_r["result"], title="[bold green]📊 分析结论[/]", border_style="green"))
+                                break
                         continue
                     if last_exec_result and last_exec_result.get("rows"):
                         analysis = agent._tool_analyze_result(task1, last_exec_result["rows"], last_exec_result["row_count"])
@@ -511,6 +541,11 @@ def demo_full_agent_workflow():
                 elif tool_name == "execute_sql":
                     if "execute_sql" in auto_executed2:
                         console.print("  [dim]⏭️  已自动执行，跳过重复步骤[/]")
+                        if last_exec2:
+                            if last_exec2.get("rows"):
+                                print_result_table(last_exec2["columns"], last_exec2["rows"])
+                            if last_exec2.get("error"):
+                                console.print(f"[red]❌ 执行错误: {last_exec2['error']}[/red]")
                         continue
                     sql_to_run = agent2._resolve_sql(tool_input, last_sql2)
                     exec_result = agent2._tool_execute_sql(sql_to_run)
@@ -522,6 +557,10 @@ def demo_full_agent_workflow():
                 elif tool_name == "analyze_result":
                     if "analyze_result" in auto_executed2:
                         console.print("  [dim]⏭️  已自动分析，跳过重复步骤[/]")
+                        for prev_r in reversed(results2):
+                            if prev_r.get("tool") == "analyze_result" and isinstance(prev_r.get("result"), str):
+                                console.print(Panel(prev_r["result"], title="[bold green]📊 分析结论[/]", border_style="green"))
+                                break
                         continue
                     if last_exec2 and last_exec2.get("rows"):
                         analysis = agent2._tool_analyze_result(task2, last_exec2["rows"], last_exec2["row_count"])
