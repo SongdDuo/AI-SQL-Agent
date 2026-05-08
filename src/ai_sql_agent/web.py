@@ -790,10 +790,10 @@ function updateBadge() {
 	    return;
 	  }
 	  el.innerHTML = sessions.map(function(s) {
-    return '<div class="session-item" data-id="' + s.id + '" onclick="loadSession('' + s.id + '')"' +
+    return '<div class="session-item" data-id="' + s.id + '" onclick="loadSession('" + s.id + "')"' +
 	      '<div class="session-item-title">' + escapeHtml(s.title) + '</div>' +
 	      '<div class="session-item-time">' + s.created + '</div>' +
-    '<div class="session-item-del" onclick="event.stopPropagation();deleteSession('' + s.id + '');renderSessionList();">&#10005;</div>' +
+    '<div class="session-item-del" onclick="event.stopPropagation();deleteSession('" + s.id + "');renderSessionList();">&#10005;</div>' +
 	      '</div>';
 	  }).join('');
 	}
