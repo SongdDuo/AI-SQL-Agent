@@ -156,6 +156,29 @@ ruff format .
 2. Update dialect resolution in `db/connector.py`
 3. Add CLI choice in `cli.py` DIALECT_CHOICES
 
+## Web UI (`src/ai_sql_agent/web.py`)
+
+### 启动
+```bash
+ai-sql web --port 8080
+```
+
+### 关键功能
+- **多轮对话**：对话历史通过 localStorage 存储，按会话分组，支持切换/删除/新建
+- **写操作支持**：统一走 `generate_sql`，LLM 根据上下文判断 SELECT/INSERT/UPDATE/DELETE/CREATE
+- **多语句 SQL**：`connector.execute()` 支持按 `;` 拆分逐条执行
+- **中文输出**：`SYSTEM_PROMPT` 和 `NL_TO_SQL_PROMPT` 均为中文，强制 LLM 中文回复
+- **暗色主题**：theme-btn/menu-toggle 使用 `var(--bg2)` 背景 + `var(--text2)` 文字
+- **日志**：按天写入 `logs/web_YYYY-MM-DD.log`，记录用户消息、AI 回复、错误异常
+
+### 示例数据库（13 张表）
+department, employee, customer, orders, product, order_detail, attendance, customer_feedback, project, employee_skill, salary_history
+
+### JS 开发注意事项
+- HTML 模板是 Python 多行字符串，JS 代码中的引号必须正确转义
+- 用 `node -c` 检查提取后的 JS 语法：`python -c "import re; content=open('web.py').read(); scripts=re.findall(r'<script[^>]*>([\s\S]*?)</script>', content[content.find('HTML_TEMPLATE'):]); open('check.js','w').write(scripts[1])"` 然后 `node -c check.js`
+- 浏览器缓存可能导致旧 JS 代码残留，测试时建议强制刷新（Ctrl+Shift+R）
+
 ## Important Notes
 
 - Agent uses JSON parsing for structured outputs with markdown code block handling
