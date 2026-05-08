@@ -91,6 +91,9 @@
             transition: background var(--duration) var(--ease);
         }
         nav .container { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+        .ai-icon { width: 1em; height: 1em; vertical-align: -.15em; }
+        nav .logo .ai-icon { width: 20px; height: 20px; color: var(--color-accent); }
+        .feature-icon .ai-icon { width: 22px; height: 22px; color: var(--color-accent); }
         nav .logo {
             font-size: 15px; font-weight: 600; letter-spacing: -.2px;
             color: var(--color-text-primary); display: flex; align-items: center; gap: 8px;
@@ -345,10 +348,22 @@
 </head>
 <body>
 
+<svg style="display:none">
+  <symbol id="ai-icon" viewBox="0 0 24 24">
+    <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="8" cy="9" r="1.8" fill="currentColor"/>
+    <circle cx="16" cy="9" r="1.8" fill="currentColor"/>
+    <circle cx="12" cy="15" r="1.8" fill="currentColor"/>
+    <line x1="8" y1="12" x2="12" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="16" y1="12" x2="12" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    <text x="12" y="8" text-anchor="middle" dominant-baseline="middle" font-size="5" font-weight="bold" fill="currentColor" font-family="sans-serif">AI</text>
+  </symbol>
+</svg>
+
 <!-- Nav -->
 <nav>
     <div class="container">
-        <div class="logo">🤖 <em>AI</em>&nbsp;SQL&nbsp;Agent</div>
+        <div class="logo"><svg class="ai-icon"><use href="#ai-icon"/></svg><em>AI</em>&nbsp;SQL&nbsp;Agent</div>
         <div class="links">
             <a href="#features">功能</a>
             <a href="#demo">演示</a>
@@ -387,7 +402,7 @@
                 <p>用中文描述需求，AI 自动生成生产级 SQL。支持复杂查询、多表关联、聚合分析</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🤖</div>
+                <div class="feature-icon"><svg class="ai-icon"><use href="#ai-icon"/></svg></div>
                 <h3>Agent 自动工作流</h3>
                 <p>自动拆解复杂任务为子任务，按序执行生成→执行→分析，输出综合报告</p>
             </div>

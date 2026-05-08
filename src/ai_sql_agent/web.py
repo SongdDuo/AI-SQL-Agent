@@ -320,6 +320,10 @@ body.light{
   transition:var(--transition);
 }
 .banner-left{display:flex;align-items:center;gap:10px}
+.ai-icon{width:1em;height:1em;vertical-align:-.15em}
+.banner-logo .ai-icon{width:22px;height:22px;vertical-align:-4px;color:var(--accent);margin-right:4px}
+.welcome-icon .ai-icon{width:56px;height:56px;color:var(--accent)}
+.msg-avatar .ai-icon{width:16px;height:16px;color:#fff}
 .banner-logo{font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
 .banner-logo em{font-style:normal;color:var(--accent)}
 .banner-badge{
@@ -336,6 +340,10 @@ body.light{
   transition:var(--transition);
 }
 .theme-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);transform:scale(1.05)}
+body:not(.light) .theme-btn,
+body:not(.light) .menu-toggle{
+  background:rgba(255,255,255,.08);color:var(--text);border-color:rgba(255,255,255,.18);
+}
 
 /* ── Layout ───────────────────────────────────────────────── */
 .app{display:flex;height:calc(100vh - 52px);overflow:hidden}
@@ -349,19 +357,28 @@ body.light{
   display:flex;flex-direction:column;
   transition:var(--transition);
 }
+body:not(.light) .left-panel{
+  background:linear-gradient(180deg,#121216 0%,#0f0f13 100%);
+  border-right-color:rgba(255,255,255,.08);
+}
 .panel-header{
   padding:16px 18px 12px;border-bottom:1px solid var(--border);
   font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;
   display:flex;align-items:center;gap:6px;
 }
+body:not(.light) .panel-header{
+  color:#d8d2c7;background:rgba(255,255,255,.025);border-bottom-color:rgba(255,255,255,.08);
+}
 
 /* Schema section */
 .schema-section{flex:1;overflow-y:auto;padding:12px}
+body:not(.light) .schema-section{background:#101014}
 .schema-group{margin-bottom:12px}
 .schema-group-title{
-  font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;
+  font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;
   letter-spacing:.8px;padding:4px 6px 8px;
 }
+body:not(.light) .schema-group-title{color:#d6c7ae}
 .schema-card{
   background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);
   padding:10px 14px;margin-bottom:6px;cursor:pointer;transition:var(--transition);
@@ -369,6 +386,15 @@ body.light{
 .schema-card:hover{border-color:var(--accent);background:var(--accent-light)}
 .schema-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .schema-card-cols{font-size:11px;color:var(--text2);line-height:1.5;word-break:break-all}
+body:not(.light) .schema-card{
+  background:#1f2026;border-color:rgba(255,255,255,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.16);
+}
+body:not(.light) .schema-card:hover{
+  background:#28262a;border-color:rgba(201,169,122,.5);
+}
+body:not(.light) .schema-card-name{color:#f2eee7}
+body:not(.light) .schema-card-cols{color:#a8a3a0}
 
 /* Config section */
 .config-section{padding:12px 18px;border-top:1px solid var(--border)}
@@ -380,9 +406,21 @@ body.light{
   font-family:inherit;transition:var(--transition);outline:none;
 }
 .config-row select:focus,.config-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+body:not(.light) .config-section{
+  background:#121216;border-top-color:rgba(255,255,255,.08);
+}
+body:not(.light) .config-row label{color:#c8c1b8}
+body:not(.light) .config-row select,
+body:not(.light) .config-row input{
+  background:#17181d;border-color:rgba(255,255,255,.1);color:#f2eee7;
+}
+body:not(.light) .config-row select:hover,
+body:not(.light) .config-row input:hover{border-color:rgba(201,169,122,.35)}
+body:not(.light) .config-row input::placeholder{color:#7d7872}
 
 	/* ── Session List ──────────────────────────────────────────── */
 	.session-list{flex:1;overflow-y:auto;padding:8px 12px}
+	body:not(.light) .session-list{background:#101014}
 	.session-item{
 	  padding:8px 10px;border-radius:var(--radius-xs);margin-bottom:4px;
 	  cursor:pointer;transition:var(--transition);position:relative;
@@ -397,6 +435,20 @@ body.light{
 	  font-size:11px;color:var(--text3);cursor:pointer;transition:var(--transition);
 	}
 	.session-item-del:hover{background:var(--red-bg);color:var(--red)}
+	body:not(.light) .session-item{
+	  background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.045);
+	}
+	body:not(.light) .session-item:hover{
+	  background:rgba(201,169,122,.1);border-color:rgba(201,169,122,.28);
+	}
+	body:not(.light) .session-item-title{color:#eee9e1}
+	body:not(.light) .session-item-time{color:#9d968d}
+	body:not(.light) .session-item-del{color:#b5aea5}
+	.session-item.active{background:var(--accent-light);border-color:var(--accent)}
+	body:not(.light) .session-item.active{
+	  background:linear-gradient(135deg,rgba(201,169,122,.2),rgba(201,169,122,.08));
+	  border-color:rgba(201,169,122,.42);
+	}
 
 /* ── Provider Menu ─────────────────────────────────────────── */
 .provider-menu{
@@ -456,6 +508,8 @@ body.light{
   background:var(--glass);border:1px solid var(--border);
   border-top-left-radius:4px;
 }
+body:not(.light) .msg.assistant .msg-bubble{color:var(--text)}
+body:not(.light) .msg.assistant .msg-bubble p{color:var(--text)}
 .msg.user .msg-bubble{
   background:var(--accent);color:#fff;border-top-right-radius:4px;
 }
@@ -591,11 +645,23 @@ if(typeof marked==='undefined'){
 </head>
 <body>
 
+<svg style="display:none">
+  <symbol id="ai-icon" viewBox="0 0 24 24">
+    <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="8" cy="9" r="1.8" fill="currentColor"/>
+    <circle cx="16" cy="9" r="1.8" fill="currentColor"/>
+    <circle cx="12" cy="15" r="1.8" fill="currentColor"/>
+    <line x1="8" y1="12" x2="12" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="16" y1="12" x2="12" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    <text x="12" y="8" text-anchor="middle" dominant-baseline="middle" font-size="5" font-weight="bold" fill="currentColor" font-family="sans-serif">AI</text>
+  </symbol>
+</svg>
+
 <!-- Banner -->
 <div class="banner">
   <div class="banner-left">
     <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
-    <div class="banner-logo">🤖 <em>AI</em>&nbsp;SQL&nbsp;Agent</div>
+    <div class="banner-logo"><svg class="ai-icon"><use href="#ai-icon"/></svg><em>AI</em>&nbsp;SQL&nbsp;Agent</div>
     <div class="banner-badge" id="bannerBadge">LongCat-2.0</div>
   </div>
   <div class="banner-right">
@@ -644,7 +710,7 @@ if(typeof marked==='undefined'){
   <div class="right-panel">
     <div class="chat-messages" id="chatMessages">
       <div class="welcome" id="welcome">
-        <div class="welcome-icon">🤖</div>
+        <div class="welcome-icon"><svg class="ai-icon"><use href="#ai-icon"/></svg></div>
         <h2>你好，我是 AI SQL Agent</h2>
         <p>内置示例数据库，包含部门、员工、客户、订单、产品 5 张表。输入自然语言，我来帮你生成 SQL 并执行。</p>
         <div class="welcome-chips">
@@ -723,6 +789,7 @@ function updateBadge() {
 	const HISTORY_KEY = 'ai_sql_chat_history';
 	const SESSIONS_KEY = 'ai_sql_sessions';
 	let currentSessionId = null;
+	let chatHistory = [];
 
 	function getSessions() {
 	  try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]'); } catch(e) { return []; }
@@ -758,11 +825,12 @@ function updateBadge() {
 	  chatHistory = getHistory(sessionId);
 	  const msgs = document.getElementById('chatMessages');
 	  msgs.innerHTML = '';
-	  document.getElementById('welcome').style.display = chatHistory.length ? 'none' : '';
+	  const welcome = document.getElementById('welcome');
+	  if (welcome) welcome.style.display = chatHistory.length ? 'none' : '';
 	  chatHistory.forEach(function(h) {
 	    const div = document.createElement('div');
 	    div.className = 'msg ' + h.role;
-	    const avatar = h.role === 'assistant' ? '🤖' : '👤';
+	    const avatar = h.role === 'assistant' ? '<svg class="ai-icon"><use href="#ai-icon"/></svg>' : '👤';
 	    const content = h.role === 'assistant'
 	      ? ((typeof marked !== 'undefined') ? marked.parse(h.content) : h.content)
 	      : escapeHtml(h.content);
@@ -770,15 +838,44 @@ function updateBadge() {
 	    msgs.appendChild(div);
 	  });
 	  msgs.scrollTop = msgs.scrollHeight;
+	  renderSessionList();
+	}
+	function switchToAvailableSession() {
+	  const sessions = getSessions();
+	  if (sessions.length > 0) {
+	    loadSession(sessions[0].id);
+	  } else {
+	    newChat();
+	  }
+	}
+	function removeSession(sessionId) {
+	  deleteSession(sessionId);
+	  if (currentSessionId === sessionId) {
+	    switchToAvailableSession();
+	  } else {
+	    renderSessionList();
+	  }
+	}
+	function bindSessionEvents() {
 	  document.querySelectorAll('.session-item').forEach(function(el) {
-	    el.style.background = el.dataset.id === sessionId ? 'var(--accent-light)' : '';
+	    el.classList.toggle('active', el.dataset.id === currentSessionId);
+	    el.addEventListener('click', function() {
+	      loadSession(el.dataset.id);
+	    });
+	  });
+	  document.querySelectorAll('.session-item-del').forEach(function(el) {
+	    el.addEventListener('click', function(event) {
+	      event.stopPropagation();
+	      removeSession(el.dataset.id);
+	    });
 	  });
 	}
 	function newChat() {
 	  currentSessionId = createNewSession();
 	  chatHistory = [];
 	  document.getElementById('chatMessages').innerHTML = '';
-	  document.getElementById('welcome').style.display = '';
+	  const welcome = document.getElementById('welcome');
+	  if (welcome) welcome.style.display = '';
 	  renderSessionList();
 	}
 	function renderSessionList() {
@@ -790,12 +887,13 @@ function updateBadge() {
 	    return;
 	  }
 	  el.innerHTML = sessions.map(function(s) {
-    return '<div class="session-item" data-id="' + s.id + '" onclick="loadSession(\'" + s.id + "\')"' +
+	    return '<div class="session-item" data-id="' + escapeHtml(s.id) + '">' +
 	      '<div class="session-item-title">' + escapeHtml(s.title) + '</div>' +
-	      '<div class="session-item-time">' + s.created + '</div>' +
-    '<div class="session-item-del" onclick="event.stopPropagation();deleteSession(\'" + s.id + "\');renderSessionList();">&#10005;</div>' +
+	      '<div class="session-item-time">' + escapeHtml(s.created) + '</div>' +
+	      '<div class="session-item-del" data-id="' + escapeHtml(s.id) + '">&#10005;</div>' +
 	      '</div>';
 	  }).join('');
+	  bindSessionEvents();
 	}
 	(function initChat() {
 	  const sessions = getSessions();
@@ -877,15 +975,18 @@ fetch('/api/schema')
           <div class="schema-card-cols">${t.columns}</div>
         </div>`).join('')}
     </div>`;
-  }).catch(() => {});
+  }).catch(e => {
+    const el = document.getElementById('schemaSection');
+    if (el) {
+      el.innerHTML = '<div style="color:var(--red);font-size:13px;padding:20px;text-align:center">数据表结构加载失败：' + escapeHtml(e.message || '未知错误') + '</div>';
+    }
+  });
 
 // ── Chat ─────────────────────────────────────────────────────
 const messagesEl = document.getElementById('chatMessages');
 const inputEl = document.getElementById('queryInput');
 const sendBtn = document.getElementById('sendBtn');
 let welcomeHidden = false;
-// 对话历史（多轮记忆）
-let chatHistory = [];
 
 function setQuery(q) {
   inputEl.value = q;
@@ -913,7 +1014,7 @@ function addMsg(role, html) {
   hideWelcome();
   const div = document.createElement('div');
   div.className = 'msg ' + role;
-  const avatar = role === 'assistant' ? '🤖' : '👤';
+  const avatar = role === 'assistant' ? '<svg class="ai-icon"><use href="#ai-icon"/></svg>' : '👤';
   div.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${html}</div>`;
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -925,7 +1026,7 @@ function addLoading() {
   const div = document.createElement('div');
   div.className = 'msg assistant';
   div.id = 'loadingMsg';
-  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing"><i></i><i></i><i></i></div></div>`;
+  div.innerHTML = `<div class="msg-avatar"><svg class="ai-icon"><use href="#ai-icon"/></svg></div><div class="msg-bubble"><div class="typing"><i></i><i></i><i></i></div></div>`;
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -1058,6 +1159,8 @@ class Handler(SimpleHTTPRequestHandler):
         if self.path == '/' or self.path == '/index.html':
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store, max-age=0')
+            self.send_header('Pragma', 'no-cache')
             self.end_headers()
             self.wfile.write(HTML_TEMPLATE.replace("__FAVICON_SVG__", FAVICON_SVG).encode('utf-8'))
         elif self.path == '/api/schema':
@@ -1077,11 +1180,14 @@ class Handler(SimpleHTTPRequestHandler):
         resp = json.dumps(data, ensure_ascii=False, default=str).encode('utf-8')
         self.send_response(200)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store, max-age=0')
         self.send_header('Content-Length', len(resp))
         self.end_headers()
         self.wfile.write(resp)
 
     def _get_schema(self):
+        tmp = None
+        conn = None
         try:
             tmp = tempfile.mktemp(suffix='.db')
             db_config = DBConfig(db_type="sqlite", name=tmp)
@@ -1094,11 +1200,18 @@ class Handler(SimpleHTTPRequestHandler):
                 cursor.execute(f'PRAGMA table_info("{tname}")')
                 cols = [f"{row[1]}({row[2]})" for row in cursor.fetchall()]
                 tables.append({"name": tname, "columns": ", ".join(cols)})
-            conn.close()
-            os.unlink(tmp)
             return {"tables": tables}
         except Exception as e:
+            logger.exception("[Web] 数据表结构加载失败")
             return {"tables": [], "error": str(e)}
+        finally:
+            if conn:
+                conn.close()
+            if tmp:
+                try:
+                    os.unlink(tmp)
+                except Exception:
+                    pass
 
     def _handle_ask(self, body):
         query = body.get('query', '')
