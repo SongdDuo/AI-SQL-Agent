@@ -330,12 +330,12 @@ body.light{
 
 /* Theme toggle */
 .theme-btn{
-  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
-  background:var(--surface);color:var(--text);cursor:pointer;
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);
+  background:var(--bg2);color:var(--text2);cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:16px;
   transition:var(--transition);
 }
-.theme-btn:hover{background:var(--accent-light);border-color:var(--accent);transform:scale(1.05)}
+.theme-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);transform:scale(1.05)}
 
 /* ── Layout ───────────────────────────────────────────────── */
 .app{display:flex;height:calc(100vh - 52px);overflow:hidden}
@@ -359,7 +359,7 @@ body.light{
 .schema-section{flex:1;overflow-y:auto;padding:12px}
 .schema-group{margin-bottom:12px}
 .schema-group-title{
-  font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;
+  font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;
   letter-spacing:.8px;padding:4px 6px 8px;
 }
 .schema-card{
@@ -368,18 +368,35 @@ body.light{
 }
 .schema-card:hover{border-color:var(--accent);background:var(--accent-light)}
 .schema-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
-.schema-card-cols{font-size:11px;color:var(--text3);line-height:1.5;word-break:break-all}
+.schema-card-cols{font-size:11px;color:var(--text2);line-height:1.5;word-break:break-all}
 
 /* Config section */
 .config-section{padding:12px 18px;border-top:1px solid var(--border)}
 .config-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.config-row label{font-size:12px;font-weight:500;color:var(--text2);min-width:36px}
+.config-row label{font-size:12px;font-weight:500;color:var(--text);min-width:36px}
 .config-row select,.config-row input{
   flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);
   border-radius:var(--radius-xs);padding:6px 10px;font-size:12px;
   font-family:inherit;transition:var(--transition);outline:none;
 }
 .config-row select:focus,.config-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+
+	/* ── Session List ──────────────────────────────────────────── */
+	.session-list{flex:1;overflow-y:auto;padding:8px 12px}
+	.session-item{
+	  padding:8px 10px;border-radius:var(--radius-xs);margin-bottom:4px;
+	  cursor:pointer;transition:var(--transition);position:relative;
+	  border:1px solid transparent;
+	}
+	.session-item:hover{background:var(--surface-hover);border-color:var(--border)}
+	.session-item-title{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:20px}
+	.session-item-time{font-size:10px;color:var(--text3);margin-top:2px}
+	.session-item-del{
+	  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+	  width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+	  font-size:11px;color:var(--text3);cursor:pointer;transition:var(--transition);
+	}
+	.session-item-del:hover{background:var(--red-bg);color:var(--red)}
 
 /* ── Provider Menu ─────────────────────────────────────────── */
 .provider-menu{
@@ -516,12 +533,12 @@ body.light{
 
 /* ── Sidebar toggle ───────────────────────────────────────── */
 .menu-toggle{
-  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
-  background:var(--surface);color:var(--text);cursor:pointer;
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);
+  background:var(--bg2);color:var(--text2);cursor:pointer;
   align-items:center;justify-content:center;font-size:16px;transition:var(--transition);
   display:none;margin-right:8px;
 }
-.menu-toggle:hover{background:var(--accent-light)}
+.menu-toggle:hover{background:var(--accent-light);color:var(--accent)}
 
 /* ── Overlay for mobile ───────────────────────────────────── */
 .overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:35}
@@ -582,6 +599,7 @@ if(typeof marked==='undefined'){
     <div class="banner-badge" id="bannerBadge">LongCat-2.0</div>
   </div>
   <div class="banner-right">
+    <button class="theme-btn" id="newChatBtn" onclick="newChat()" title="新建对话">&#10010;</button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题">☀️</button>
   </div>
 </div>
@@ -615,6 +633,10 @@ if(typeof marked==='undefined'){
         <label>API Key</label>
         <input type="password" id="apiKey" placeholder="留空使用 .env 配置" />
       </div>
+    </div>
+    <div class="panel-header" style="border-top:1px solid var(--border)">💬 历史对话</div>
+    <div class="session-list" id="sessionList">
+      <div style="color:var(--text3);font-size:12px;padding:10px;text-align:center">暂无历史对话</div>
     </div>
   </div>
 
@@ -696,7 +718,96 @@ function updateBadge() {
   const p = document.getElementById('provider').value;
   document.getElementById('bannerBadge').textContent = providerLabels[p] || p;
 }
-function showProviderMenu() {
+
+	// ── Chat History (localStorage) ────────────────────────────--
+	const HISTORY_KEY = 'ai_sql_chat_history';
+	const SESSIONS_KEY = 'ai_sql_sessions';
+	let currentSessionId = null;
+
+	function getSessions() {
+	  try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]'); } catch(e) { return []; }
+	}
+	function saveSessions(sessions) {
+	  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+	}
+	function getHistory(sessionId) {
+	  try { return JSON.parse(localStorage.getItem(HISTORY_KEY + '_' + sessionId) || '[]'); } catch(e) { return []; }
+	}
+	function saveHistory(sessionId, history) {
+	  localStorage.setItem(HISTORY_KEY + '_' + sessionId, JSON.stringify(history));
+	}
+	function createNewSession() {
+	  const id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+	  const sessions = getSessions();
+	  sessions.unshift({id, title: '新对话', created: new Date().toLocaleString()});
+	  saveSessions(sessions);
+	  return id;
+	}
+	function updateSessionTitle(sessionId, title) {
+	  const sessions = getSessions();
+	  const s = sessions.find(x => x.id === sessionId);
+	  if (s) { s.title = title; saveSessions(sessions); }
+	}
+	function deleteSession(sessionId) {
+	  const sessions = getSessions().filter(x => x.id !== sessionId);
+	  saveSessions(sessions);
+	  localStorage.removeItem(HISTORY_KEY + '_' + sessionId);
+	}
+	function loadSession(sessionId) {
+	  currentSessionId = sessionId;
+	  chatHistory = getHistory(sessionId);
+	  const msgs = document.getElementById('chatMessages');
+	  msgs.innerHTML = '';
+	  document.getElementById('welcome').style.display = chatHistory.length ? 'none' : '';
+	  chatHistory.forEach(function(h) {
+	    const div = document.createElement('div');
+	    div.className = 'msg ' + h.role;
+	    const avatar = h.role === 'assistant' ? '🤖' : '👤';
+	    const content = h.role === 'assistant'
+	      ? ((typeof marked !== 'undefined') ? marked.parse(h.content) : h.content)
+	      : escapeHtml(h.content);
+	    div.innerHTML = '<div class="msg-avatar">' + avatar + '</div><div class="msg-bubble">' + content + '</div>';
+	    msgs.appendChild(div);
+	  });
+	  msgs.scrollTop = msgs.scrollHeight;
+	  document.querySelectorAll('.session-item').forEach(function(el) {
+	    el.style.background = el.dataset.id === sessionId ? 'var(--accent-light)' : '';
+	  });
+	}
+	function newChat() {
+	  currentSessionId = createNewSession();
+	  chatHistory = [];
+	  document.getElementById('chatMessages').innerHTML = '';
+	  document.getElementById('welcome').style.display = '';
+	  renderSessionList();
+	}
+	function renderSessionList() {
+	  const sessions = getSessions();
+	  const el = document.getElementById('sessionList');
+	  if (!el) return;
+	  if (!sessions.length) {
+	    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;text-align:center">暂无历史对话</div>';
+	    return;
+	  }
+	  el.innerHTML = sessions.map(function(s) {
+	    return '<div class="session-item" data-id="' + s.id + '" onclick="loadSession('' + s.id + '')">' +
+	      '<div class="session-item-title">' + escapeHtml(s.title) + '</div>' +
+	      '<div class="session-item-time">' + s.created + '</div>' +
+	      '<div class="session-item-del" onclick="event.stopPropagation();deleteSession('' + s.id + '');renderSessionList();">&#10005;</div>' +
+	      '</div>';
+	  }).join('');
+	}
+	(function initChat() {
+	  const sessions = getSessions();
+	  if (sessions.length > 0) {
+	    loadSession(sessions[0].id);
+	  } else {
+	    currentSessionId = createNewSession();
+	  }
+	  renderSessionList();
+	})();
+
+	function showProviderMenu() {
   const menu = document.getElementById('providerMenu');
   const input = document.getElementById('provider');
   if (menu.style.display === 'none') {
@@ -904,12 +1015,20 @@ async function sendQuery() {
 
     // 更新对话历史
     chatHistory.push({role: 'user', content: q});
-    // 提取纯文本作为 assistant 回复记录
     const assistantText = data.answer || data.summary || data.explanation || data.analysis || data.error || data.sql || '无返回结果';
     chatHistory.push({role: 'assistant', content: assistantText});
-    // 只保留最近 20 轮
     if (chatHistory.length > 40) {
       chatHistory = chatHistory.slice(-40);
+    }
+    // 保存到 localStorage
+    if (currentSessionId) {
+      saveHistory(currentSessionId, chatHistory);
+      // 更新会话标题（用第一条用户消息）
+      const firstUser = chatHistory.find(h => h.role === 'user');
+      if (firstUser && chatHistory.length <= 4) {
+        updateSessionTitle(currentSessionId, firstUser.content.substring(0, 20));
+      }
+      renderSessionList();
     }
   } catch (e) {
     removeLoading();
