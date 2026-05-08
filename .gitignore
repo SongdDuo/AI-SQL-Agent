@@ -29,6 +29,12 @@ env/
 .coverage
 htmlcov/
 
+# Claude Code
+CLAUDE.md
+
+# Logs
+logs/
+
 # OS
 .DS_Store
 Thumbs.db

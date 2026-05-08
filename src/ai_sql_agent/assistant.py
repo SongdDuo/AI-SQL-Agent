@@ -71,18 +71,26 @@ class SQLAssistant:
 
     def _parse_json(self, text: str) -> Dict:
         """Parse JSON from LLM response, handling markdown code blocks."""
+        import re as _re
         content = text.strip()
-        if content.startswith("```"):
-            parts = content.split("```")
-            for part in parts:
-                part = part.strip()
-                if part.startswith("json"):
-                    part = part[4:].strip()
-                if part.startswith("{"):
-                    try:
-                        return json.loads(part)
-                    except json.JSONDecodeError:
-                        continue
+
+        # 1. Try to extract JSON from ```json ... ``` code blocks first
+        code_block_match = _re.search(r"```(?:json)?\s*(\{.*?\})\s*```", content, _re.DOTALL)
+        if code_block_match:
+            try:
+                return json.loads(code_block_match.group(1))
+            except json.JSONDecodeError:
+                pass
+
+        # 2. Try to find the first {...} block in the text
+        brace_match = _re.search(r"\{.*\}", content, _re.DOTALL)
+        if brace_match:
+            try:
+                return json.loads(brace_match.group(0))
+            except json.JSONDecodeError:
+                pass
+
+        # 3. Try raw content
         try:
             return json.loads(content)
         except json.JSONDecodeError:
@@ -97,11 +105,35 @@ class SQLAssistant:
             schema_context=self._schema_context(tables),
             query=query,
         )
+        logger.debug(f"[LLM] generate_sql prompt:\n{prompt}")
         result = self._chat([self._system_msg(SYSTEM_PROMPT), self._user_msg(prompt)])
+        logger.debug(f"[LLM] generate_sql response:\n{result}")
         parsed = self._parse_json(result)
-        parsed.setdefault("sql", result)
+        # Only set sql from raw response if "sql" key is missing AND parsed is not the raw fallback
+        if "sql" not in parsed:
+            if "raw" in parsed:
+                # LLM didn't return valid JSON — try to extract SQL from raw text
+                parsed["sql"] = self._extract_sql_from_text(parsed["raw"])
+            else:
+                parsed["sql"] = result
         parsed.setdefault("explanation", "")
         return parsed
+
+    def _extract_sql_from_text(self, text: str) -> str:
+        """Try to extract a SQL query from free-form text when JSON parsing fails."""
+        import re as _re
+        # Look for SELECT/INSERT/UPDATE/DELETE ... ; or end of string
+        for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE", "WITH"):
+            pattern = _re.compile(rf"({keyword}\b.*?)(?:;|$)", _re.IGNORECASE | _re.DOTALL)
+            match = pattern.search(text)
+            if match:
+                return match.group(1).strip()
+        # Fallback: return first non-empty line
+        for line in text.split("\n"):
+            stripped = line.strip()
+            if stripped:
+                return stripped
+        return text
 
     def explain_sql(self, sql: str) -> str:
         """Explain a SQL query in plain language."""

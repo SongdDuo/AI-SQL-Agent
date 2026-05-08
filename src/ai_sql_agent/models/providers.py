@@ -39,6 +39,21 @@ class OpenAICompatibleModel(BaseModel):
             content = content.decode("utf-8", errors="replace")
         return content
 
+    def chat_stream(self, messages: List[Message], **kwargs):
+        """Stream chat response, yields delta chunks."""
+        client = self._get_client()
+        stream = client.chat.completions.create(
+            model=self.model,
+            messages=[m.to_dict() for m in messages],
+            max_tokens=kwargs.get("max_tokens", self.max_tokens),
+            temperature=kwargs.get("temperature", self.temperature),
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+
 
 class ClaudeModel(BaseModel):
     """Provider for Anthropic Claude API (official and proxy)."""
@@ -71,6 +86,27 @@ class ClaudeModel(BaseModel):
             messages=chat_messages,
         )
         return response.content[0].text
+
+    def chat_stream(self, messages: List[Message], **kwargs):
+        """Stream chat response, yields delta chunks."""
+        client = self._get_client()
+        system_content = ""
+        chat_messages = []
+        for m in messages:
+            if m.role == "system":
+                system_content = m.content
+            else:
+                chat_messages.append(m.to_dict())
+        with client.messages.stream(
+            model=self.model,
+            max_tokens=kwargs.get("max_tokens", self.max_tokens),
+            temperature=kwargs.get("temperature", self.temperature),
+            system=system_content if system_content else "",
+            messages=chat_messages,
+        ) as stream:
+            for text in stream.text_stream:
+                if text:
+                    yield text
 
 
 # Provider registry

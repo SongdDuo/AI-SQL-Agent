@@ -1,7 +1,7 @@
 """Base model interface for unified LLM access."""
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Iterator
 
 
 class Message:
@@ -30,6 +30,11 @@ class BaseModel(ABC):
     def chat(self, messages: List[Message], **kwargs) -> str:
         """Send messages and get response."""
         ...
+
+    def chat_stream(self, messages: List[Message], **kwargs) -> Iterator[str]:
+        """Stream chat response, yields delta chunks. Override for streaming support."""
+        # Default fallback: non-streaming
+        yield self.chat(messages, **kwargs)
 
     @property
     def provider_name(self) -> str:

@@ -153,28 +153,76 @@ class SQLAgent:
 
     def _tool_generate_sql(self, query: str, **kwargs) -> Dict[str, Any]:
         """Generate SQL from natural language."""
+        logger.debug(f"[generate_sql] Input query: {query}")
         result = self.assistant.generate_sql(query, kwargs.get("tables"))
-        # Auto-validate generated sql
+        # Clean the generated SQL to remove any surrounding prose
         sql = result.get("sql", "")
         if sql:
+            sql = self._clean_sql(sql)
+            result["sql"] = sql
+            logger.debug(f"[generate_sql] Generated SQL: {sql}")
+            # Auto-validate generated sql
             validation = validate_and_fix(sql, self.dialect)
             result["validation"] = validation
             if not validation["is_valid"]:
                 result["sql"] = validation["fixed_sql"]
                 result["auto_fixed"] = True
                 result["fix_changes"] = validation["changes"]
+                logger.debug(f"[generate_sql] Auto-fixed SQL: {result['sql']}, changes: {validation['changes']}")
         return result
+
+    def _resolve_sql(self, tool_input: str, last_known_sql: str) -> str:
+        """
+        Resolve the actual SQL to execute/validate.
+        LLM-generated sub-task inputs may be descriptive text rather than SQL.
+        If the input doesn't look like SQL, fall back to the last known good SQL.
+        """
+        cleaned = tool_input.strip()
+        # Check if it starts with a SQL keyword
+        import re as _re
+        if _re.match(r'^\s*(SELECT|INSERT|UPDATE|DELETE|WITH)\b', cleaned, _re.IGNORECASE):
+            return self._clean_sql(cleaned)
+        # Not SQL — use last known good SQL if available
+        if last_known_sql:
+            logger.info(f"Sub-task input is not SQL ('{cleaned[:50]}...'), using last known SQL")
+            return last_known_sql
+        # No fallback available, try to extract SQL from the text
+        return self._clean_sql(cleaned)
+
+    def _clean_sql(self, sql: str) -> str:
+        """Clean SQL string — extract only the actual SQL query, removing surrounding prose."""
+        import re as _re
+        cleaned = sql.strip()
+        # Remove common prose prefixes that LLM may add
+        # e.g. "Here is the SQL: ..." or "The query is: ..."
+        prose_prefix = _re.match(
+            r'^(here\s+is|the\s+sql|the\s+query|query|sql|result)\s*[:\s]*',
+            cleaned, _re.IGNORECASE
+        )
+        if prose_prefix:
+            cleaned = cleaned[prose_prefix.end():].strip()
+        # Extract only the SQL portion (SELECT/INSERT/UPDATE/DELETE/WITH ... up to ;)
+        for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE", "WITH"):
+            match = _re.search(rf"({keyword}\b.*?)(?:;|$)", cleaned, _re.IGNORECASE | _re.DOTALL)
+            if match:
+                return match.group(1).strip()
+        return cleaned
 
     def _tool_execute_sql(self, sql: str, **kwargs) -> Dict[str, Any]:
         """Execute SQL with auto-fix on failure."""
-        result = self.assistant.execute_sql(sql)
+        cleaned_sql = self._clean_sql(sql)
+        logger.debug(f"[execute_sql] Executing: {cleaned_sql}")
+        result = self.assistant.execute_sql(cleaned_sql)
+        if result.get("rows"):
+            logger.debug(f"[execute_sql] Success: {result['row_count']} rows returned")
         if result.get("error"):
+            logger.debug(f"[execute_sql] Error: {result['error']}")
             # Auto-fix and retry
-            fix_result = validate_and_fix(sql, self.dialect, result["error"], self.max_fix_retries)
-            if fix_result["changes"] and fix_result["fixed_sql"] != sql:
+            fix_result = validate_and_fix(cleaned_sql, self.dialect, result["error"], self.max_fix_retries)
+            if fix_result["changes"] and fix_result["fixed_sql"] != cleaned_sql:
                 logger.info(f"Auto-fixing SQL: {fix_result['changes']}")
                 retry = self.assistant.execute_sql(fix_result["fixed_sql"])
-                retry["original_sql"] = sql
+                retry["original_sql"] = cleaned_sql
                 retry["fixed_sql"] = fix_result["fixed_sql"]
                 retry["fix_changes"] = fix_result["changes"]
                 return retry
@@ -198,7 +246,10 @@ class SQLAgent:
 
     def _tool_analyze_result(self, query: str, rows: List[Dict], row_count: int, **kwargs) -> str:
         """Analyze query results."""
-        return self.assistant.analyze_result(query, rows, row_count)
+        logger.debug(f"[analyze_result] Query: {query}, rows: {row_count}")
+        result = self.assistant.analyze_result(query, rows, row_count)
+        logger.debug(f"[analyze_result] Analysis: {result[:200]}...")
+        return result
 
     def _tool_final_answer(self, answer: str, **kwargs) -> str:
         """Final answer."""
@@ -215,11 +266,13 @@ class SQLAgent:
             tools=self._get_tool_descriptions(),
             task=task,
         )
-        result = self.assistant._chat([
-            Message("system", SYSTEM_PROMPT),
-            Message("user", prompt),
-        ])
-        return self._parse_json(result)
+        messages = [Message("system", SYSTEM_PROMPT), Message("user", prompt)]
+        logger.debug(f"[CoT] LLM input prompt:\n{prompt}")
+        result = self.assistant._chat(messages)
+        logger.debug(f"[CoT] LLM raw output:\n{result}")
+        parsed = self._parse_json(result)
+        logger.debug(f"[CoT] Parsed sub-tasks: {json.dumps(parsed, ensure_ascii=False, default=str)[:500]}")
+        return parsed
 
     def _parse_json(self, text: str) -> Dict:
         """Parse JSON from LLM response."""
@@ -305,7 +358,9 @@ class SQLAgent:
                         results.append({"tool": "analyze_result", "result": analysis})
 
             elif tool_name == "execute_sql":
-                exec_result = self._tool_execute_sql(tool_input)
+                # Use the last known good SQL if input doesn't look like SQL
+                sql_to_execute = self._resolve_sql(tool_input, last_sql)
+                exec_result = self._tool_execute_sql(sql_to_execute)
                 last_execution_result = exec_result
                 results.append({"tool": "execute_sql", "result": exec_result})
 
@@ -316,19 +371,23 @@ class SQLAgent:
                 results.append({"tool": "analyze_result", "result": analysis})
 
             elif tool_name == "validate_sql":
-                validation = self._tool_validate_sql(tool_input)
+                sql_to_validate = self._resolve_sql(tool_input, last_sql)
+                validation = self._tool_validate_sql(sql_to_validate)
                 results.append({"tool": "validate_sql", "result": validation})
 
             elif tool_name == "fix_sql":
-                fix_result = self._tool_fix_sql(tool_input, st.get("error_message", ""))
+                sql_to_fix = self._resolve_sql(tool_input, last_sql)
+                fix_result = self._tool_fix_sql(sql_to_fix, st.get("error_message", ""))
                 results.append({"tool": "fix_sql", "result": fix_result})
 
             elif tool_name == "explain_sql":
-                explanation = self._tool_explain_sql(tool_input)
+                sql_to_explain = self._resolve_sql(tool_input, last_sql)
+                explanation = self._tool_explain_sql(sql_to_explain)
                 results.append({"tool": "explain_sql", "result": explanation})
 
             elif tool_name == "optimize_sql":
-                opt_result = self._tool_optimize_sql(tool_input)
+                sql_to_optimize = self._resolve_sql(tool_input, last_sql)
+                opt_result = self._tool_optimize_sql(sql_to_optimize)
                 results.append({"tool": "optimize_sql", "result": opt_result})
 
             elif tool_name == "final_answer":
