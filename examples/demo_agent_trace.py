@@ -110,17 +110,17 @@ class TraceLogger:
         if log_file and os.path.exists(log_file):
             with open(log_file, "r", encoding="utf-8") as f:
                 content = f.read()
-            # 按 ==== 分隔符拆分各条记录
-            records = [r.strip() for r in content.split("=" * 80) if r.strip()]
-            # 过滤掉头部注释
+            separator = "=" * 80 if "=" * 80 in content else "─" * 60
+            records = [r.strip() for r in content.split(separator) if r.strip()]
             records = [r for r in records if not r.startswith("#")]
             console.print(f"  共 {len(records)} 条日志记录\n")
             for i, record in enumerate(records):
                 lines = record.split("\n")
-                # 第一行是时间戳和 logger 名
                 header = lines[0] if lines else ""
-                # 找内容预览
-                content_lines = [l for l in lines[1:] if l.strip() and not l.startswith("─")]
+                content_lines = [
+                    l for l in lines[1:]
+                    if l.strip() and not l.startswith("─") and not l.startswith("=")
+                ]
                 content_preview = " ".join(content_lines)[:100] if content_lines else header
                 console.print(f"  [{i+1:02d}] {content_preview}...")
             console.print()
