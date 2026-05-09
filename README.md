@@ -249,7 +249,7 @@ print(f"摘要:\n{result['summary']}")
 
 | 提供商 | provider 参数 | 默认模型 | 特点 |
 |--------|-------------|---------|------|
-| LongCat | `longcat` | longcat-2.0-preview | 综合能力最强 |
+| LongCat | `longcat` | LongCat-2.0-Preview | 综合能力最强 |
 | LongCat Flash | `longcat-flash` | LongCat-Flash-Chat | 快速响应 |
 | LongCat Thinking | `longcat-thinking` | LongCat-Flash-Thinking-2601 | 强推理能力 |
 | LongCat Omni | `longcat-omni` | LongCat-Flash-Omni-2603 | 多模态 |
