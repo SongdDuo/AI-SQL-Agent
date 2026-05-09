@@ -272,7 +272,7 @@ print(f"摘要:\n{result['summary']}")
 | DeepSeek | `deepseek` | DeepSeek-V4 | OpenAI 兼容 |
 | 阿里通义 | `qwen` | Qwen3.6 | OpenAI 兼容 |
 | 月之暗面 Kimi | `kimi` | Kimi-K2.6 | OpenAI 兼容 |
-| 字节豆包 | `doubao` | Doubao-Seed-1.6 | OpenAI 兼容 |
+| 字节豆包 | `doubao` | Doubao-Seed-2.0 | OpenAI 兼容 |
 | 腾讯元宝 | `yuanbao` | hunyuan-turbo | OpenAI 兼容 |
 
 ### 🔄 通用中转站
